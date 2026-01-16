@@ -1,0 +1,42 @@
+<div class="flex align-items-center justify-content-center min-h-screen surface-ground">
+    <div class="w-full md:w-5 lg:w-4 xl:w-3 p-4">
+
+        <p-card styleClass="shadow-4 border-round-lg">
+            <div class="text-center mb-5">
+                <i class="pi pi-briefcase text-4xl text-primary mb-3"></i>
+                <div class="text-900 text-3xl font-medium mb-3">Bienvenido</div>
+                <span class="text-600 font-medium">Inicia sesión en AppGestión</span>
+            </div>
+
+            <div class="flex flex-column gap-3">
+
+                <p-floatLabel>
+                    <input pInputText id="username" [(ngModel)]="usuario" class="w-full" />
+                    <label for="username">Usuario</label>
+                </p-floatLabel>
+
+                <p-floatLabel>
+                    <p-password id="password" [(ngModel)]="password" [toggleMask]="true" [feedback]="false"
+                        styleClass="w-full" inputStyleClass="w-full">
+                    </p-password>
+                    <label for="password">Contraseña</label>
+                </p-floatLabel>
+
+                <div class="flex align-items-center justify-content-between mb-2">
+                    <div class="flex align-items-center gap-2">
+                        <p-checkbox [(ngModel)]="recordar" [binary]="true" inputId="remember"></p-checkbox>
+                        <label for="remember" class="text-600 cursor-pointer">Recordarme</label>
+                    </div>
+                    <a routerLink="/" class="text-primary no-underline cursor-pointer hover:underline text-sm">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <p-button label="Entrar" icon="pi pi-sign-in" styleClass="w-full" [loading]="loading"
+                    (onClick)="onLogin()">
+                </p-button>
+            </div>
+        </p-card>
+
+    </div>
+</div>

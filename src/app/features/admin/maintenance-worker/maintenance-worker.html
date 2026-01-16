@@ -1,0 +1,162 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid">
+    <div class="col-12">
+        <div class="card shadow-2 border-round p-4 surface-card">
+
+            <p-table #dt [value]="workers" [lazy]="true" (onLazyLoad)="loadWorkers($event)"
+                [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
+                [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '50rem' }"
+                styleClass="p-datatable-striped" dataKey="id">
+
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h3 class="m-0 text-900 font-bold">Gestión de Trabajadores</h3>
+
+                        <div class="flex gap-2 align-items-center">
+                            
+                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary" (click)="op.toggle($event)"></p-button>
+                            
+                            <p-popover #op [style]="{width: '300px'}">
+                                <ng-template pTemplate>
+                                    <div class="flex flex-column gap-3">
+                                        <div class="flex flex-column gap-2">
+                                            <label class="font-bold">Estado</label>
+                                            <p-select 
+                                                [options]="estados" 
+                                                [(ngModel)]="estadoFilter" 
+                                                placeholder="Todos"
+                                                [showClear]="true"
+                                                optionLabel="label" 
+                                                optionValue="value"
+                                                [style]="{'width':'100%'}">
+                                            </p-select>
+                                        </div>
+                                        <div class="flex flex-column gap-2">
+                                            <label class="font-bold">Categoría</label>
+                                            <p-select 
+                                                [options]="categorias" 
+                                                [(ngModel)]="categoriaFilter" 
+                                                placeholder="Todas"
+                                                [showClear]="true"
+                                                optionLabel="nombre"
+                                                [filter]="true" 
+                                                filterBy="nombre"
+                                                [style]="{'width':'100%'}">
+                                            </p-select>
+                                        </div>
+                                        <div class="flex justify-content-end gap-2 mt-2">
+                                            <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true" (click)="clearFilters(); op.hide()"></p-button>
+                                            <p-button label="Aplicar" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </p-popover>
+
+                            <span class="p-input-icon-left" style="position: relative; display: block;">
+                                <i class="pi pi-search"
+                                    style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary);">
+                                </i>
+                                <input pInputText type="text" (input)="onSearch($event)"
+                                    placeholder="Buscar por nombre..." style="padding-left: 3rem; width: 100%;" />
+                            </span>
+
+                            <p-button label="Nueva" icon="pi pi-plus" severity="success" (click)="openNew()">
+                            </p-button>
+                        </div>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:25%">Nombre</th>
+                        <th style="width:20%">Categoría</th>
+                        <th style="width:15%">Estado</th>
+                        <th style="width:20%">P. Trabajador</th>
+                        <th style="width:20%">Acciones</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-w>
+                    <tr>
+                        <td><span class="font-bold">{{ w.nombre }} {{ w.apellido }}</span></td>
+                        <td>{{ w.categoria?.nombre }}</td>
+                        <td>
+                            <span [class]="'customer-badge status-' + (w.estado ? w.estado.toLowerCase() : '')">
+                                {{ w.estado }}
+                            </span>
+                        </td>
+                        <td>{{ w.categoria?.precio_hora_trabajador | number:'1.2-2' }} €/h</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                                    (onClick)="editWorker(w)"></p-button>
+                                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                    (onClick)="deleteWorker(w)"></p-button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<p-dialog [(visible)]="workerDialog" [style]="{ width: '450px' }" [header]="dialogTitle" [modal]="true"
+    styleClass="p-fluid">
+
+    <ng-template pTemplate="content">
+        <div class="field mb-3">
+            <label for="nombre" class="font-bold">Nombre</label>
+            <input type="text" pInputText id="nombre" [(ngModel)]="worker.nombre" required autofocus />
+            <small class="p-error block mt-1" *ngIf="submitted && !worker.nombre">Requerido.</small>
+        </div>
+        <div class="field mb-3">
+            <label for="apellido" class="font-bold">Apellido</label>
+            <input type="text" pInputText id="apellido" [(ngModel)]="worker.apellido" />
+        </div>
+        <div class="field mb-3">
+            <label for="dni" class="font-bold">DNI</label>
+            <input type="text" pInputText id="dni" [(ngModel)]="worker.dni" />
+        </div>
+
+        <div class="formgrid grid">
+            <div class="field col-6">
+                <label for="categoria" class="font-bold">Categoría</label>
+                <p-select 
+                    id="categoria"
+                    [options]="categorias" 
+                    [(ngModel)]="worker.categoria" 
+                    optionLabel="nombre" 
+                    placeholder="Seleccionar"
+                    [filter]="true"
+                    filterBy="nombre"
+                    [showClear]="true"
+                    appendTo="body">
+                </p-select>
+                <small class="p-error block mt-1" *ngIf="submitted && (!worker.categoria || !worker.categoria.id)">Requerido.</small>
+            </div>
+
+            <div class="field col-6">
+                <label for="estado" class="font-bold">Estado</label>
+                <p-select 
+                    id="estado"
+                    [options]="estados" 
+                    [(ngModel)]="worker.estado" 
+                    optionLabel="label" 
+                    optionValue="value"
+                    placeholder="Estado"
+                    appendTo="body">
+                </p-select>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
+            (click)="saveWorker()"></button>
+    </ng-template>
+</p-dialog>

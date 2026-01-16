@@ -1,0 +1,38 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card shadow-2 border-round p-4 surface-card">
+            <div class="flex justify-content-between align-items-center mb-4">
+                <h3 class="m-0 text-900 font-bold">Panel de Mantenimiento</h3>
+                </div>
+
+            <p-table [value]="opciones" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 25%">Módulo</th>
+                        <th style="width: 60%">Descripción</th>
+                        <th style="width: 15%">Acción</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-opcion>
+                    <tr>
+                        <td>
+                            <span class="font-bold text-primary">{{ opcion.nombre }}</span>
+                        </td>
+                        <td class="text-600">
+                            {{ opcion.descripcion }}
+                        </td>
+                        <td>
+                            <p-button 
+                                icon="pi pi-arrow-right" 
+                                label="Entrar" 
+                                [text]="true" 
+                                [rounded]="true" 
+                                [routerLink]="opcion.ruta">
+                            </p-button>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
