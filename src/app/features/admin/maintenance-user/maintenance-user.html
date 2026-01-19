@@ -1,0 +1,95 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid">
+    <div class="col-12">
+        <div class="card shadow-2 border-round p-4 surface-card">
+
+            <p-table #dt [value]="usuarios" [lazy]="true" (onLazyLoad)="loadUsers($event)"
+                [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
+                [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '50rem' }"
+                styleClass="p-datatable-striped" dataKey="id">
+
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h3 class="m-0 text-900 font-bold">Gestión de Usuarios</h3>
+
+                        <div class="flex gap-2 align-items-center">
+                            <span class="p-input-icon-left" style="position: relative; display: block;">
+
+                                <i class="pi pi-search"
+                                    style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary);">
+                                </i>
+
+                                <input pInputText type="text" (input)="onSearch($event)"
+                                    placeholder="Buscar por nombre..." style="padding-left: 3rem; width: 100%;" />
+                            </span>
+
+                            <p-button label="Nueva" icon="pi pi-plus" severity="success" (click)="openNew()">
+                            </p-button>
+                        </div>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:40%">Usuario</th>
+                        <th style="width:40%">Rol</th>
+                        <th style="width:20%">Acciones</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-cat>
+                    <tr>
+                        <td><span class="font-bold">{{ cat.usuario }}</span></td>
+
+                        <td>{{ cat.isAdmin ? 'Administrador' : 'Usuario' }}</td>
+
+                        <td>{{ cat.usuario | number:'1.2-2' }} €/h</td>
+                        <td>
+                            <div class="flex gap-2">
+                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                                    (onClick)="editUser(cat)"></p-button>
+                                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                    (onClick)="deleteUser(cat)"></p-button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<p-dialog [(visible)]="categoryDialog" [style]="{ width: '450px' }" [header]="dialogTitle" [modal]="true"
+    styleClass="p-fluid">
+
+    <ng-template pTemplate="content">
+        <div class="field mb-4">
+            <label for="nombre" class="font-bold">Usuario</label>
+            <input type="text" pInputText id="nombre" [(ngModel)]="user.usuario" required autofocus />
+            <small class="p-error block mt-1" *ngIf="submitted && !user.usuario">El usuario es obligatorio.</small>
+        </div>
+
+        <div class="formgrid grid">
+            <div class="field col">
+                <label for="precioTrabajador" class="font-bold">¿Es Administrador?</label>
+                <p-checkbox id="precioTrabajador" [(ngModel)]="user.isAdmin" binary="true"></p-checkbox>
+            </div>
+
+            <div class="field col">
+                <label for="precioCoste" class="font-bold">Precio Coste</label>
+                <p-inputNumber id="precioCoste" [(ngModel)]="user.usuario" mode="currency" currency="EUR"
+                    locale="es-ES">
+                </p-inputNumber>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
+            (click)="saveUser()"></button>
+    </ng-template>
+</p-dialog>
