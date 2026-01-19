@@ -21,5 +21,6 @@ export class Maintenance {
     { nombre: 'Gestión de Trabajadores', descripcion: 'Administrar la información de los trabajadores.', ruta: '/mantenimiento/trabajadores' },
     { nombre: 'Gestión de Categorías', descripcion: 'Definir y modificar categorías de trabajadores.', ruta: '/mantenimiento/categorias' },
     { nombre: 'Gestión de Registros', descripcion: 'Ver y gestionar los registros de horas trabajadas.', ruta: '/mantenimiento/registros' },
+    { nombre: 'Gestión de Materiales', descripcion: 'Administrar el inventario de materiales.', ruta: '/mantenimiento/materiales' },
   ];
 }

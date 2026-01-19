@@ -1,1 +1,158 @@
-<p>maintenance-material works!</p>
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid">
+    <div class="col-12">
+        <div class="card shadow-2 border-round p-4 surface-card">
+
+            <p-table #dt [value]="materials" [lazy]="true" (onLazyLoad)="loadMaterials($event)"
+                [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
+                [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '60rem' }"
+                styleClass="p-datatable-striped" dataKey="id">
+
+                <ng-template pTemplate="caption">
+                    <div class="flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h3 class="m-0 text-900 font-bold">Gestión de Materiales</h3>
+
+                        <div class="flex gap-2 align-items-center">
+                            
+                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary" (click)="op.toggle($event)"></p-button>
+                            
+                            <p-popover #op [style]="{width: '320px'}">
+                                <ng-template pTemplate>
+                                    <div class="flex flex-column gap-3">
+                                        <div class="flex flex-column gap-2">
+                                            <label class="font-bold">Nº Factura</label>
+                                            <input pInputText [(ngModel)]="facturaFilter" placeholder="Ej: FAC-001" class="w-full"/>
+                                        </div>
+                                        <div class="flex flex-column gap-2">
+                                            <label class="font-bold">Referencia</label>
+                                            <input pInputText [(ngModel)]="referenciaFilter" placeholder="Ej: REF-123" class="w-full"/>
+                                        </div>
+                                        <div class="flex justify-content-end gap-2 mt-2">
+                                            <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true" (click)="clearFilters(); op.hide()"></p-button>
+                                            <p-button label="Aplicar" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </p-popover>
+
+                            <span class="p-input-icon-left" style="position: relative; display: block;">
+                                <i class="pi pi-search"
+                                    style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary);">
+                                </i>
+                                <input pInputText type="text" (input)="onSearch($event)"
+                                    placeholder="Buscar por nombre..." style="padding-left: 3rem; width: 100%;" />
+                            </span>
+
+                            <p-button label="Nuevo" icon="pi pi-plus" severity="success" (click)="openNew()">
+                            </p-button>
+                        </div>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width:25%">Nombre</th>
+                        <th style="width:20%">Referencia</th>
+                        <th style="width:15%">Nº Factura</th>
+                        <th style="width:15%">Precio Unit.</th>
+                        <th style="width:10%">Stock</th>
+                        <th style="width:15%">Acciones</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-mat>
+                    <tr>
+                        <td><span class="font-bold">{{ mat.nombre }}</span></td>
+                        <td>{{ mat.referencia }}</td>
+                        <td>{{ mat.num_factura || '-' }}</td>
+                        <td>{{ mat.precio_unitario | number:'1.2-2' }} €</td>
+                        <td>
+                            <span [class]="'customer-badge status-' + (mat.stock > 10 ? 'instock' : (mat.stock > 0 ? 'lowstock' : 'outofstock'))"
+                                  style="padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700;">
+                                {{ mat.stock }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex gap-2">
+                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                                    (onClick)="editMaterial(mat)"></p-button>
+                                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                    (onClick)="deleteMaterial(mat)"></p-button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</div>
+
+<p-dialog 
+    [(visible)]="materialDialog" 
+    [style]="{ width: '750px', 'max-width': '95vw' }" 
+    [header]="dialogTitle" 
+    [modal]="true"
+    styleClass="p-fluid"
+    [contentStyle]="{'overflow': 'visible'}"
+    [draggable]="false" 
+    [resizable]="false">
+
+    <ng-template pTemplate="content">
+        <div class="field mb-4 flex flex-column gap-2">
+            <label for="nombre" class="font-bold">Nombre del Material</label>
+            <input type="text" pInputText id="nombre" [(ngModel)]="material.nombre" required autofocus />
+            <small class="p-error block mt-1" *ngIf="submitted && !material.nombre">El nombre es obligatorio.</small>
+        </div>
+
+        <div class="formgrid grid">
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="referencia" class="font-bold">Referencia</label>
+                <input type="text" pInputText id="referencia" [(ngModel)]="material.referencia" required />
+                <small class="p-error block mt-1" *ngIf="submitted && !material.referencia">Requerido.</small>
+            </div>
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="factura" class="font-bold">Nº Factura</label>
+                <input type="text" pInputText id="factura" [(ngModel)]="material.num_factura" />
+            </div>
+        </div>
+
+        <div class="formgrid grid mt-3">
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="precio" class="font-bold">Precio Unitario</label>
+                <p-inputNumber 
+                    id="precio" 
+                    [(ngModel)]="material.precio_unitario" 
+                    mode="currency" 
+                    currency="EUR" 
+                    locale="es-ES"
+                    [min]="0">
+                </p-inputNumber>
+            </div>
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="stock" class="font-bold">Stock</label>
+                <p-inputNumber 
+                    id="stock" 
+                    [(ngModel)]="material.stock" 
+                    mode="decimal" 
+                    [showButtons]="true" 
+                    [min]="0"
+                    buttonLayout="horizontal"
+                    decrementButtonClass="p-button-danger"
+                    incrementButtonClass="p-button-success"
+                    incrementButtonIcon="pi pi-plus" 
+                    decrementButtonIcon="pi pi-minus"
+                    [inputStyle]="{'text-align': 'center'}">
+                </p-inputNumber>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
+            (click)="saveMaterial()"></button>
+    </ng-template>
+</p-dialog>

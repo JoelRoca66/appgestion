@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Material } from '../models/material.model';
-import { MaterialFilter } from '../models/MaterialFilterModel';
+import { MaterialFilter } from '../models/materialFilter.model';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 
