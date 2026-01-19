@@ -15,11 +15,11 @@ import { User } from '../../../core/models/user.model';
 export class AdminDashboard {
   users: User[] = [
     {
-      id: 1, usuario: 'jroca', isAdmin: true,
+      id: 1, usuario: 'jroca', isAdmin: true, password: 'securePass123',
       worker: { id: 1, nombre: 'Joel', apellido: 'Roca', dni: '123A', estado: 'Alta', categoria: { id: 1, nombre: 'Jefe Proyecto', precio_hora_coste: 50, precio_hora_trabajador: 100 } }
     },
     {
-      id: 2, usuario: 'pepe', isAdmin: false,
+      id: 2, usuario: 'pepe', isAdmin: false, password: 'securePass456',
       worker: { id: 2, nombre: 'Pepe', apellido: 'García', dni: '456B', estado: 'Baja', categoria: { id: 2, nombre: 'Junior Dev', precio_hora_coste: 20, precio_hora_trabajador: 40 } }
     },
   ];
