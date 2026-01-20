@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core'; 
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -26,6 +26,7 @@ import { Category } from '../../../core/models/category.model';
   providers: [ConfirmationService, MessageService],
   templateUrl: './maintenance-category.html',
   styleUrl: './maintenance-category.css',
+  changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class MaintenanceCategory implements OnInit {
   @ViewChild('dt') dt!: Table;
@@ -58,32 +59,32 @@ export class MaintenanceCategory implements OnInit {
   loadCategories(event: TableLazyLoadEvent) {
     this.lastTableEvent = event;
     
-    setTimeout(() => {
-        this.loading = true;
-        if (this.currentRequest) {
-            this.currentRequest.unsubscribe();
+    // Eliminado setTimeout
+    this.loading = true;
+    
+    if (this.currentRequest) {
+        this.currentRequest.unsubscribe();
+    }
+
+    const page = (event.first ?? 0) / (event.rows ?? 10);
+    const size = event.rows ?? 10;
+
+    const requestObservable = this.searchTerm 
+        ? this.categoryService.searchCategoria(this.searchTerm, page, size)
+        : this.categoryService.getCategorias(page, size);
+
+    this.currentRequest = requestObservable.subscribe({
+        next: (response) => {
+            this.categorias = response.content;
+            this.totalRecords = response.totalElements;
+            this.loading = false;
+            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+        },
+        error: () => {
+            this.loading = false;
+            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
         }
-
-        const page = (event.first ?? 0) / (event.rows ?? 10);
-        const size = event.rows ?? 10;
-
-        const requestObservable = this.searchTerm 
-            ? this.categoryService.searchCategoria(this.searchTerm, page, size)
-            : this.categoryService.getCategorias(page, size);
-
-        this.currentRequest = requestObservable.subscribe({
-            next: (response) => {
-                this.categorias = response.content;
-                this.totalRecords = response.totalElements;
-                this.loading = false;
-                this.cdr.detectChanges();
-            },
-            error: () => {
-                this.loading = false;
-                this.cdr.detectChanges();
-            }
-        });
-    }, 0);
+    });
   }
 
   onSearch(event: Event) {
@@ -97,20 +98,26 @@ export class MaintenanceCategory implements OnInit {
     this.submitted = false;
     this.dialogTitle = 'Nueva Categoría';
     this.categoryDialog = true;
+    this.cdr.markForCheck();
   }
 
   editCategory(cat: Category) {
     this.category = { ...cat };
     this.dialogTitle = 'Editar Categoría';
     this.categoryDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveCategory() {
     this.submitted = true;
-    if (!this.category.nombre.trim()) return;
+    if (!this.category.nombre.trim()) {
+        this.cdr.markForCheck();
+        return;
+    }
     
     if (this.category.precio_hora_coste < this.category.precio_hora_trabajador) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Coste debe ser >= Trabajador' });
+        this.cdr.markForCheck();
         return; 
     }
 
@@ -123,9 +130,11 @@ export class MaintenanceCategory implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Operación realizada' });
             this.categoryDialog = false;
             this.reloadCurrentPage();
+            this.cdr.markForCheck();
         },
         error: () => {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+            this.cdr.markForCheck();
         }
     });
   }
@@ -141,9 +150,11 @@ export class MaintenanceCategory implements OnInit {
             next: () => {
                 this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Eliminado' });
                 this.reloadCurrentPage(); 
+                this.cdr.markForCheck();
             },
             error: () => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+                this.cdr.markForCheck();
             }
         });
       }
@@ -153,6 +164,7 @@ export class MaintenanceCategory implements OnInit {
   hideDialog() {
     this.categoryDialog = false;
     this.submitted = false;
+    this.cdr.markForCheck();
   }
 
   reloadCurrentPage() {

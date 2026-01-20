@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core'; 
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -29,6 +29,7 @@ import { MaterialFilter } from '../../../core/models/materialFilter.model';
   providers: [ConfirmationService, MessageService],
   templateUrl: './maintenance-material.html',
   styleUrl: './maintenance-material.css',
+  changeDetection: ChangeDetectionStrategy.OnPush // <--- ESTRATEGIA ONPUSH
 })
 export class MaintenanceMaterial implements OnInit {
 
@@ -77,40 +78,40 @@ export class MaintenanceMaterial implements OnInit {
   loadMaterials(event: TableLazyLoadEvent) {
     this.lastTableEvent = event;
     
-    setTimeout(() => {
-        this.loading = true;
-        if (this.currentRequest) {
-            this.currentRequest.unsubscribe();
+    // Eliminado setTimeout
+    this.loading = true;
+    
+    if (this.currentRequest) {
+        this.currentRequest.unsubscribe();
+    }
+
+    const page = (event.first ?? 0) / (event.rows ?? 10);
+    const size = event.rows ?? 10;
+
+    const hasFilters = this.searchTerm || this.facturaFilter || this.referenciaFilter;
+
+    const filterParams: MaterialFilter = {
+        term: this.searchTerm,
+        num_factura: this.facturaFilter,
+        referencia: this.referenciaFilter
+    };
+
+    const requestObservable = hasFilters
+        ? this.materialService.searchMaterial(filterParams, page, size)
+        : this.materialService.getMaterials(page, size);
+
+    this.currentRequest = requestObservable.subscribe({
+        next: (response) => {
+            this.materials = response.content;
+            this.totalRecords = response.totalElements;
+            this.loading = false;
+            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+        },
+        error: () => {
+            this.loading = false;
+            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
         }
-
-        const page = (event.first ?? 0) / (event.rows ?? 10);
-        const size = event.rows ?? 10;
-
-        const hasFilters = this.searchTerm || this.facturaFilter || this.referenciaFilter;
-
-        const filterParams: MaterialFilter = {
-            term: this.searchTerm,
-            num_factura: this.facturaFilter,
-            referencia: this.referenciaFilter
-        };
-
-        const requestObservable = hasFilters
-            ? this.materialService.searchMaterial(filterParams, page, size)
-            : this.materialService.getMaterials(page, size);
-
-        this.currentRequest = requestObservable.subscribe({
-            next: (response) => {
-                this.materials = response.content;
-                this.totalRecords = response.totalElements;
-                this.loading = false;
-                this.cdr.detectChanges();
-            },
-            error: () => {
-                this.loading = false;
-                this.cdr.detectChanges();
-            }
-        });
-    }, 0);
+    });
   }
 
   onSearch(event: Event) {
@@ -135,19 +136,27 @@ export class MaintenanceMaterial implements OnInit {
     this.submitted = false;
     this.dialogTitle = 'Nuevo Material';
     this.materialDialog = true;
+    this.cdr.markForCheck(); // <--- Para mostrar el diálogo
   }
 
   editMaterial(mat: Material) {
     this.material = { ...mat }; 
     this.dialogTitle = 'Editar Material';
     this.materialDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveMaterial() {
     this.submitted = true;
     
-    if (!this.material.nombre.trim()) return;
-    if (!this.material.referencia.trim()) return;
+    if (!this.material.nombre.trim()) {
+        this.cdr.markForCheck();
+        return;
+    }
+    if (!this.material.referencia.trim()) {
+        this.cdr.markForCheck();
+        return;
+    }
 
     const request = this.material.id 
         ? this.materialService.update(this.material) 
@@ -158,9 +167,11 @@ export class MaintenanceMaterial implements OnInit {
             this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Operación realizada' });
             this.materialDialog = false;
             this.reloadCurrentPage();
+            this.cdr.markForCheck();
         },
         error: () => {
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
+            this.cdr.markForCheck();
         }
     });
   }
@@ -176,9 +187,11 @@ export class MaintenanceMaterial implements OnInit {
             next: () => {
                 this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Eliminado' });
                 this.reloadCurrentPage(); 
+                this.cdr.markForCheck();
             },
             error: () => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
+                this.cdr.markForCheck();
             }
         });
       }
@@ -188,6 +201,7 @@ export class MaintenanceMaterial implements OnInit {
   hideDialog() {
     this.materialDialog = false;
     this.submitted = false;
+    this.cdr.markForCheck();
   }
 
   reloadCurrentPage() {

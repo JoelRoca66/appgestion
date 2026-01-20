@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -11,7 +11,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { CheckboxModule } from 'primeng/checkbox'; 
 import { PasswordModule } from 'primeng/password';
 
-import { MessageService } from 'primeng/api'; // ConfirmationService ya no hace falta
+import { MessageService } from 'primeng/api';
 import { UserService } from '../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 
@@ -24,6 +24,7 @@ import { User } from '../../../core/models/user.model';
   providers: [MessageService],
   templateUrl: './maintenance-user.html',
   styleUrl: './maintenance-user.css',
+  changeDetection: ChangeDetectionStrategy.OnPush // <--- ESTRATEGIA ONPUSH
 })
 export class MaintenanceUser implements OnInit {
 
@@ -38,7 +39,6 @@ export class MaintenanceUser implements OnInit {
   private currentRequest: Subscription | null = null;
 
   userDialog: boolean = false;
-  // Inicializamos objeto limpio
   user: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false };
   submitted: boolean = false;
   dialogTitle: string = '';
@@ -56,32 +56,32 @@ export class MaintenanceUser implements OnInit {
   loadUsers(event: TableLazyLoadEvent) {
     this.lastTableEvent = event;
 
-    setTimeout(() => {
-      this.loading = true;
-      if (this.currentRequest) {
-        this.currentRequest.unsubscribe();
+    // Eliminado setTimeout
+    this.loading = true;
+    
+    if (this.currentRequest) {
+      this.currentRequest.unsubscribe();
+    }
+
+    const page = (event.first ?? 0) / (event.rows ?? 10);
+    const size = event.rows ?? 10;
+
+    const requestObservable = this.searchTerm
+      ? this.userService.searchUser(this.searchTerm, page, size)
+      : this.userService.getUsers(page, size);
+
+    this.currentRequest = requestObservable.subscribe({
+      next: (response) => {
+        this.usuarios = response.content;
+        this.totalRecords = response.totalElements;
+        this.loading = false;
+        this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
       }
-
-      const page = (event.first ?? 0) / (event.rows ?? 10);
-      const size = event.rows ?? 10;
-
-      const requestObservable = this.searchTerm
-        ? this.userService.searchUser(this.searchTerm, page, size)
-        : this.userService.getUsers(page, size);
-
-      this.currentRequest = requestObservable.subscribe({
-        next: (response) => {
-          this.usuarios = response.content;
-          this.totalRecords = response.totalElements;
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
-    }, 0);
+    });
   }
 
   onSearch(event: Event) {
@@ -90,26 +90,30 @@ export class MaintenanceUser implements OnInit {
     this.dt.reset();
   }
 
-  // Solo EDITAR
   editUser(user: User) {
     this.user = { ...user };
     this.dialogTitle = 'Editar Usuario';
     this.userDialog = true;
+    this.cdr.markForCheck();
   }
 
   saveUser() {
     this.submitted = true;
-    if (!this.user.usuario.trim()) return;
+    if (!this.user.usuario.trim()) {
+        this.cdr.markForCheck();
+        return;
+    }
 
-    // Solo llamamos a update, ya no hay create
     this.userService.update(this.user).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Usuario actualizado' });
         this.userDialog = false;
         this.reloadCurrentPage();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -117,6 +121,7 @@ export class MaintenanceUser implements OnInit {
   hideDialog() {
     this.userDialog = false;
     this.submitted = false;
+    this.cdr.markForCheck();
   }
 
   reloadCurrentPage() {

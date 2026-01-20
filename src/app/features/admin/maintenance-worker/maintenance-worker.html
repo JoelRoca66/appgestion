@@ -4,7 +4,7 @@
 <div class="grid">
     <div class="col-12">
         <div class="card shadow-2 border-round p-4 surface-card">
-
+            <h1 class="m-0 text-900 font-bold">Gestión de Trabajadores</h1>
             <p-table #dt [value]="workers" [lazy]="true" (onLazyLoad)="loadWorkers($event)"
                 [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
                 [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '50rem' }"
@@ -12,9 +12,9 @@
 
                 <ng-template pTemplate="caption">
                     <div class="flex align-items-center justify-content-between flex-wrap gap-2">
-                        <h3 class="m-0 text-900 font-bold">Gestión de Trabajadores</h3>
 
-                        <div class="flex gap-2 align-items-center">
+
+                        <div class="flex gap-2 align-items-center flex-wrap">
 
                             <p-button label="Filtros" icon="pi pi-filter" severity="secondary"
                                 (click)="op.toggle($event)"></p-button>
@@ -45,6 +45,13 @@
                                     </div>
                                 </div>
                             </p-popover>
+                            @for (filter of activeFilters; track filter.key) {
+                            <p-chip [label]="filter.label" [removable]="false" class="ml-2 border-primary text-primary surface-overlay text-sm font-bold">
+                                <i class="pi pi-filter mr-2 text-xs"></i>
+                            </p-chip>
+                            }
+                        </div>
+                        <div class="flex gap-2 align-items-center">
 
                             <span class="p-input-icon-left" style="position: relative; display: block;">
                                 <i class="pi pi-search"
@@ -73,17 +80,18 @@
                 <ng-template pTemplate="body" let-w>
                     <tr>
                         <td><span class="font-bold">{{ w.nombre }} {{ w.apellido }}</span></td>
-                        
+
                         <td>{{ w.id_categoria?.nombre || w.categoria?.nombre }}</td>
-                        
+
                         <td>
                             <span [class]="'customer-badge status-' + (w.estado ? w.estado.toLowerCase() : '')">
                                 {{ w.estado }}
                             </span>
                         </td>
-                        
-                        <td>{{ (w.id_categoria?.precio_hora_trabajador || w.categoria?.precio_hora_trabajador) | number:'1.2-2' }} €/h</td>
-                        
+
+                        <td>{{ (w.id_categoria?.precio_hora_trabajador || w.categoria?.precio_hora_trabajador) |
+                            number:'1.2-2' }} €/h</td>
+
                         <td>
                             <div class="flex gap-2">
                                 <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
@@ -114,7 +122,7 @@
         </div>
         <div class="field mb-3">
             <label for="dni" class="font-bold">DNI</label>
-            <input type="text" pInputText id="dni" [(ngModel)]="worker.dni" required autofocus/>
+            <input type="text" pInputText id="dni" [(ngModel)]="worker.dni" required autofocus />
             <small class="p-error block mt-1" *ngIf="submitted && !worker.dni">Requerido.</small>
         </div>
 
@@ -145,38 +153,55 @@
     </ng-template>
 </p-dialog>
 
-<p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Asignar Usuario al Trabajador" [modal]="true" styleClass="p-fluid">
-    
+<p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Asignar Usuario" [modal]="true"
+    styleClass="p-fluid" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
+
     <ng-template pTemplate="content">
-        <div class="field mb-3">
-            <p class="text-600 mb-4">
-                El trabajador se ha creado correctamente. <br>
-                <strong>Opcional:</strong> Cree un usuario para que pueda acceder al sistema.
-            </p>
+        <div class="field mb-4">
+            <div class="surface-100 p-3 border-round text-600" style="font-size: 0.9rem;">
+                <i class="pi pi-info-circle mr-2"></i>
+                El trabajador ha sido creado. Ahora debe asignarle un usuario para que pueda iniciar sesión en el
+                sistema.
+            </div>
         </div>
 
-        <div class="field mb-3 flex flex-column gap-2">
+        <div class="field mb-4 flex flex-column gap-2">
             <label for="newUsername" class="font-bold">Nombre de Usuario</label>
             <input type="text" pInputText id="newUsername" [(ngModel)]="newUser.usuario" required autofocus />
+            <small class="text-500">Se usará para iniciar sesión.</small>
         </div>
 
-        <div class="field mb-3 flex flex-column gap-2">
+        <div class="field mb-4 flex flex-column gap-2">
             <label for="newPassword" class="font-bold">Contraseña</label>
-            <p-password id="newPassword" [(ngModel)]="newUser.contrasena" [toggleMask]="true" [feedback]="false"></p-password>
+            <p-password id="newPassword" [(ngModel)]="newUser.contrasena" [toggleMask]="true" [feedback]="true"
+                placeholder="********" autocomplete="off" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}"
+                promptLabel="Escribe una contraseña." weakLabel="Demasiado simple." mediumLabel="Seguridad media."
+                strongLabel="Contraseña compleja.">
+
+                <ng-template #header>
+                    <div class="font-semibold text-xm mb-4">Seguridad</div>
+                </ng-template>
+                <ng-template #footer>
+                    <p-divider />
+                    <ul class="pl-2 my-0 leading-normal text-sm">
+                        <li>Al menos una minúscula</li>
+                        <li>Al menos una mayúscula</li>
+                        <li>Al menos un número</li>
+                        <li>Mínimo 8 caracteres</li>
+                    </ul>
+                </ng-template>
+            </p-password>
         </div>
 
-        <div class="field mb-3 flex align-items-center gap-2">
-            <p-checkbox id="newAdmin" [(ngModel)]="newUser.rol" [binary]="true" inputId="adminCheck"></p-checkbox>
-            <label for="adminCheck">¿Es Administrador?</label>
+        <div class="field flex align-items-center gap-2">
+            <p-checkbox id="newAdmin" [(ngModel)]="newUser.rol" [binary]="true" inputId="adminCheck">
+            </p-checkbox>
+            <label for="adminCheck" class="cursor-pointer select-none">Conceder permisos de Administrador</label>
         </div>
     </ng-template>
 
     <ng-template pTemplate="footer">
-        <button pButton pRipple label="Omitir" icon="pi pi-times" class="p-button-text p-button-secondary" 
-            (click)="skipUserCreation()"></button>
-        
-        <button pButton pRipple label="Crear Usuario" icon="pi pi-check" class="p-button-text" 
+        <button pButton pRipple label="Crear Usuario" icon="pi pi-check" class="p-button-text"
             (click)="saveUser()"></button>
     </ng-template>
-
 </p-dialog>

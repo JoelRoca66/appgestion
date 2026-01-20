@@ -23,12 +23,13 @@ export class ProjectService {
 
     searchProject(filter: ProjectFilter, page: number, size: number): Observable<PageResponse<Project>> {
         const params = new HttpParams()
-            .set('term', filter.term)
-            .set('clienteId', filter.clienteId ? filter.clienteId.toString() : '')
-            .set('fechaInicioDesde', filter.fechaInicioDesde ? filter.fechaInicioDesde.toISOString() : '')
-            .set('fechaInicioHasta', filter.fechaInicioHasta ? filter.fechaInicioHasta.toISOString() : '')
-            .set('fechaFinDesde', filter.fechaFinDesde ? filter.fechaFinDesde.toISOString() : '')
-            .set('fechaFinHasta', filter.fechaFinHasta ? filter.fechaFinHasta.toISOString() : '')
+            .set('texto', filter.texto)
+            .set('estado', filter.estado ? filter.estado : '')
+            .set('margenBeneficioMin', filter.margenBeneficioMin ? filter.margenBeneficioMin.toString().split('T')[0] : '')
+            .set('fechaInicioDesde', filter.fecha_inicio_desde ? filter.fecha_inicio_desde.toISOString().split('T')[0] : '')
+            .set('fechaInicioHasta', filter.fecha_inicio_hasta ? filter.fecha_inicio_hasta.toISOString().split('T')[0] : '')
+            .set('fechaFinDesde', filter.fecha_fin_desde ? filter.fecha_fin_desde.toISOString().split('T')[0] : '')
+            .set('fechaFinHasta', filter.fecha_fin_hasta ? filter.fecha_fin_hasta.toISOString().split('T')[0] : '')
             .set('page', page.toString())
             .set('size', size.toString());
         return this.http.get<PageResponse<any>>(`${this.apiUrl}/search`, { params });
