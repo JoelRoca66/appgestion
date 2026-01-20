@@ -26,9 +26,10 @@ export class MaterialService {
 
     searchMaterial(filter: MaterialFilter, page: number, size: number): Observable<PageResponse<Material>> {
         let params = new HttpParams()
-            .set('term', filter.term)
-            .set('num_factura', filter.num_factura ? filter.num_factura : '')
-            .set('referencia', filter.referencia ? filter.referencia : '')
+            .set('texto', filter.texto)
+            .set('stock_maximo', filter.stock_maximo ? filter.stock_maximo.toString() : '')
+            .set('precio_minimo', filter.precio_minimo ? filter.precio_minimo.toString() : '')
+            .set('precio_maximo', filter.precio_maximo ? filter.precio_maximo.toString() : '')
             .set('page', page.toString())
             .set('size', size.toString());
 

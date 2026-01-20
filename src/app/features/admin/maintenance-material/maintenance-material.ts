@@ -29,7 +29,7 @@ import { MaterialFilter } from '../../../core/models/materialFilter.model';
   providers: [ConfirmationService, MessageService],
   templateUrl: './maintenance-material.html',
   styleUrl: './maintenance-material.css',
-  changeDetection: ChangeDetectionStrategy.OnPush // <--- ESTRATEGIA ONPUSH
+  changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class MaintenanceMaterial implements OnInit {
 
@@ -78,7 +78,6 @@ export class MaintenanceMaterial implements OnInit {
   loadMaterials(event: TableLazyLoadEvent) {
     this.lastTableEvent = event;
     
-    // Eliminado setTimeout
     this.loading = true;
     
     if (this.currentRequest) {
@@ -91,9 +90,10 @@ export class MaintenanceMaterial implements OnInit {
     const hasFilters = this.searchTerm || this.facturaFilter || this.referenciaFilter;
 
     const filterParams: MaterialFilter = {
-        term: this.searchTerm,
-        num_factura: this.facturaFilter,
-        referencia: this.referenciaFilter
+        texto: this.searchTerm,
+        stock_maximo: undefined,
+        precio_minimo: undefined,
+        precio_maximo: undefined,
     };
 
     const requestObservable = hasFilters
@@ -105,11 +105,11 @@ export class MaintenanceMaterial implements OnInit {
             this.materials = response.content;
             this.totalRecords = response.totalElements;
             this.loading = false;
-            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+            this.cdr.markForCheck(); 
         },
         error: () => {
             this.loading = false;
-            this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+            this.cdr.markForCheck(); 
         }
     });
   }
@@ -136,7 +136,7 @@ export class MaintenanceMaterial implements OnInit {
     this.submitted = false;
     this.dialogTitle = 'Nuevo Material';
     this.materialDialog = true;
-    this.cdr.markForCheck(); // <--- Para mostrar el diálogo
+    this.cdr.markForCheck(); 
   }
 
   editMaterial(mat: Material) {

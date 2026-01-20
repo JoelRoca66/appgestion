@@ -1,5 +1,6 @@
 export interface MaterialFilter {
-    term: string;
-    num_factura?: string;
-    referencia?: string;
+    texto: string;
+    stock_maximo?: number;
+    precio_minimo?: number;
+    precio_maximo?: number;
 }
