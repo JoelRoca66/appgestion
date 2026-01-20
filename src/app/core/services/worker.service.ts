@@ -36,11 +36,26 @@ export class WorkerService {
     }
 
     create(worker: Worker): Observable<Worker> {
-        return this.http.post<Worker>(`${this.apiUrl}/add`, worker);
+        const aux = {
+            nombre: worker.nombre,
+            apellido: worker.apellido,
+            dni: worker.dni,
+            estado: worker.estado,
+            id_categoria: worker.id_categoria.id
+        }
+        return this.http.post<Worker>(`${this.apiUrl}/add`, aux);
     }
 
     update(worker: Worker): Observable<Worker> {
-        return this.http.put<Worker>(`${this.apiUrl}/update`, worker);
+        const aux = {
+            id: worker.id,
+            nombre: worker.nombre,
+            apellido: worker.apellido,
+            dni: worker.dni,
+            estado: worker.estado,
+            id_categoria: worker.id_categoria.id
+        }
+        return this.http.put<Worker>(`${this.apiUrl}/update`, aux);
     }
 
     delete(id: number): Observable<void> {

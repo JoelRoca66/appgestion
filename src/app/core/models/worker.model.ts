@@ -7,5 +7,5 @@ export interface Worker {
     dni: string;
     estado: string;
 
-    categoria: Category;
+    id_categoria: Category;
 }

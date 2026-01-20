@@ -15,43 +15,35 @@
                         <h3 class="m-0 text-900 font-bold">Gestión de Trabajadores</h3>
 
                         <div class="flex gap-2 align-items-center">
-                            
-                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary" (click)="op.toggle($event)"></p-button>
-                            
-                            <p-popover #op [style]="{width: '300px'}">
-                                <ng-template pTemplate>
-                                    <div class="flex flex-column gap-3">
-                                        <div class="flex flex-column gap-2">
-                                            <label class="font-bold">Estado</label>
-                                            <p-select 
-                                                [options]="estados" 
-                                                [(ngModel)]="estadoFilter" 
-                                                placeholder="Todos"
-                                                [showClear]="true"
-                                                optionLabel="label" 
-                                                optionValue="value"
-                                                [style]="{'width':'100%'}">
-                                            </p-select>
-                                        </div>
-                                        <div class="flex flex-column gap-2">
-                                            <label class="font-bold">Categoría</label>
-                                            <p-select 
-                                                [options]="categorias" 
-                                                [(ngModel)]="categoriaFilter" 
-                                                placeholder="Todas"
-                                                [showClear]="true"
-                                                optionLabel="nombre"
-                                                [filter]="true" 
-                                                filterBy="nombre"
-                                                [style]="{'width':'100%'}">
-                                            </p-select>
-                                        </div>
-                                        <div class="flex justify-content-end gap-2 mt-2">
-                                            <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true" (click)="clearFilters(); op.hide()"></p-button>
-                                            <p-button label="Aplicar" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
-                                        </div>
+
+                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary"
+                                (click)="op.toggle($event)"></p-button>
+
+                            <p-popover #op [style]="{width: '320px'}">
+                                <div class="flex flex-column gap-3 p-3">
+                                    <div class="flex flex-column gap-2">
+                                        <label class="font-bold">Estado</label>
+                                        <p-select [options]="estados" [(ngModel)]="estadoFilter" placeholder="Todos"
+                                            [showClear]="true" optionLabel="label" optionValue="value" appendTo="body"
+                                            [style]="{'width':'100%'}">
+                                        </p-select>
                                     </div>
-                                </ng-template>
+
+                                    <div class="flex flex-column gap-2">
+                                        <label class="font-bold">Categoría</label>
+                                        <p-select [options]="categorias" [(ngModel)]="categoriaFilter"
+                                            placeholder="Todas" [showClear]="true" optionLabel="nombre" [filter]="true"
+                                            filterBy="nombre" appendTo="body" [style]="{'width':'100%'}">
+                                        </p-select>
+                                    </div>
+
+                                    <div class="flex justify-content-end gap-2 mt-2">
+                                        <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true"
+                                            (click)="clearFilters(); op.hide()"></p-button>
+                                        <p-button label="Aplicar" icon="pi pi-check"
+                                            (click)="applyFilters(); op.hide()"></p-button>
+                                    </div>
+                                </div>
                             </p-popover>
 
                             <span class="p-input-icon-left" style="position: relative; display: block;">
@@ -81,13 +73,17 @@
                 <ng-template pTemplate="body" let-w>
                     <tr>
                         <td><span class="font-bold">{{ w.nombre }} {{ w.apellido }}</span></td>
-                        <td>{{ w.categoria?.nombre }}</td>
+                        
+                        <td>{{ w.id_categoria?.nombre || w.categoria?.nombre }}</td>
+                        
                         <td>
                             <span [class]="'customer-badge status-' + (w.estado ? w.estado.toLowerCase() : '')">
                                 {{ w.estado }}
                             </span>
                         </td>
-                        <td>{{ w.categoria?.precio_hora_trabajador | number:'1.2-2' }} €/h</td>
+                        
+                        <td>{{ (w.id_categoria?.precio_hora_trabajador || w.categoria?.precio_hora_trabajador) | number:'1.2-2' }} €/h</td>
+                        
                         <td>
                             <div class="flex gap-2">
                                 <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
@@ -118,36 +114,24 @@
         </div>
         <div class="field mb-3">
             <label for="dni" class="font-bold">DNI</label>
-            <input type="text" pInputText id="dni" [(ngModel)]="worker.dni" />
+            <input type="text" pInputText id="dni" [(ngModel)]="worker.dni" required autofocus/>
+            <small class="p-error block mt-1" *ngIf="submitted && !worker.dni">Requerido.</small>
         </div>
 
         <div class="formgrid grid">
             <div class="field col-6">
                 <label for="categoria" class="font-bold">Categoría</label>
-                <p-select 
-                    id="categoria"
-                    [options]="categorias" 
-                    [(ngModel)]="worker.categoria" 
-                    optionLabel="nombre" 
-                    placeholder="Seleccionar"
-                    [filter]="true"
-                    filterBy="nombre"
-                    [showClear]="true"
-                    appendTo="body">
+                <p-select id="categoria" [options]="categorias" [(ngModel)]="worker.id_categoria" optionLabel="nombre"
+                    placeholder="Seleccionar" [filter]="true" filterBy="nombre" [showClear]="true" appendTo="body">
                 </p-select>
-                <small class="p-error block mt-1" *ngIf="submitted && (!worker.categoria || !worker.categoria.id)">Requerido.</small>
+                <small class="p-error block mt-1"
+                    *ngIf="submitted && (!worker.id_categoria || !worker.id_categoria.id)">Requerido.</small>
             </div>
 
             <div class="field col-6">
                 <label for="estado" class="font-bold">Estado</label>
-                <p-select 
-                    id="estado"
-                    [options]="estados" 
-                    [(ngModel)]="worker.estado" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    placeholder="Estado"
-                    appendTo="body">
+                <p-select id="estado" [options]="estados" [(ngModel)]="worker.estado" optionLabel="label"
+                    optionValue="value" placeholder="Estado" appendTo="body">
                 </p-select>
             </div>
         </div>
@@ -159,4 +143,40 @@
         <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
             (click)="saveWorker()"></button>
     </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="userDialog" [style]="{ width: '450px' }" header="Asignar Usuario al Trabajador" [modal]="true" styleClass="p-fluid">
+    
+    <ng-template pTemplate="content">
+        <div class="field mb-3">
+            <p class="text-600 mb-4">
+                El trabajador se ha creado correctamente. <br>
+                <strong>Opcional:</strong> Cree un usuario para que pueda acceder al sistema.
+            </p>
+        </div>
+
+        <div class="field mb-3 flex flex-column gap-2">
+            <label for="newUsername" class="font-bold">Nombre de Usuario</label>
+            <input type="text" pInputText id="newUsername" [(ngModel)]="newUser.usuario" required autofocus />
+        </div>
+
+        <div class="field mb-3 flex flex-column gap-2">
+            <label for="newPassword" class="font-bold">Contraseña</label>
+            <p-password id="newPassword" [(ngModel)]="newUser.contrasena" [toggleMask]="true" [feedback]="false"></p-password>
+        </div>
+
+        <div class="field mb-3 flex align-items-center gap-2">
+            <p-checkbox id="newAdmin" [(ngModel)]="newUser.rol" [binary]="true" inputId="adminCheck"></p-checkbox>
+            <label for="adminCheck">¿Es Administrador?</label>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Omitir" icon="pi pi-times" class="p-button-text p-button-secondary" 
+            (click)="skipUserCreation()"></button>
+        
+        <button pButton pRipple label="Crear Usuario" icon="pi pi-check" class="p-button-text" 
+            (click)="saveUser()"></button>
+    </ng-template>
+
 </p-dialog>

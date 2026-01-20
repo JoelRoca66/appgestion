@@ -39,7 +39,7 @@ export class MaintenanceUser implements OnInit {
 
   userDialog: boolean = false;
   // Inicializamos objeto limpio
-  user: User = { id: 0, usuario: '', password: '', isAdmin: false };
+  user: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false };
   submitted: boolean = false;
   dialogTitle: string = '';
 

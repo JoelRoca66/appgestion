@@ -37,8 +37,8 @@
                     <tr>
                         <td><span class="font-bold">{{ usr.usuario }}</span></td>
                         <td>
-                            <span [class]="'customer-badge status-' + (usr.isAdmin ? 'active' : 'inactive')">
-                                {{ usr.isAdmin ? 'Administrador' : 'Usuario' }}
+                            <span [class]="'customer-badge status-' + (usr.rol ? 'active' : 'inactive')">
+                                {{ usr.rol ? 'Administrador' : 'Usuario' }}
                             </span>
                         </td>
                         <td>
@@ -68,7 +68,7 @@
             
             <p-password 
                 id="password" 
-                [(ngModel)]="user.password" 
+                [(ngModel)]="user.contrasena" 
                 [feedback]="false" 
                 [toggleMask]="true"
                 placeholder="Contraseña"
@@ -76,13 +76,13 @@
                 [inputStyle]="{'width':'100%'}">
             </p-password>
 
-            <small class="p-error block mt-1" *ngIf="submitted && !user.password">La contraseña es obligatoria.</small>
+            <small class="p-error block mt-1" *ngIf="submitted && !user.contrasena">La contraseña es obligatoria.</small>
         </div>
 
         <div class="field mb-4 flex align-items-center gap-2">
             <p-checkbox 
                 id="isAdmin" 
-                [(ngModel)]="user.isAdmin" 
+                [(ngModel)]="user.rol" 
                 [binary]="true" 
                 inputId="adminCheck">
             </p-checkbox>

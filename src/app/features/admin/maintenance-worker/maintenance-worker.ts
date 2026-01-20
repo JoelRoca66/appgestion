@@ -1,7 +1,8 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core'; 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject } from 'rxjs'; 
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { Table, TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -13,12 +14,17 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ToolbarModule } from 'primeng/toolbar';
 import { SelectModule } from 'primeng/select';
 import { PopoverModule } from 'primeng/popover';
+import { PasswordModule } from 'primeng/password';
+import { CheckboxModule } from 'primeng/checkbox';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { WorkerService } from '../../../core/services/worker.service'; 
 import { CategoryService } from '../../../core/services/category.service'; 
 import { Worker } from '../../../core/models/worker.model';
 import { Category, CategoryDTO } from '../../../core/models/category.model'; 
+import { WorkerFilter } from '../../../core/models/workerFilter.model';
+import { UserService } from '../../../core/services/user.service';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-maintenance-worker',
@@ -26,7 +32,7 @@ import { Category, CategoryDTO } from '../../../core/models/category.model';
     CommonModule, FormsModule, 
     TableModule, ButtonModule, DialogModule, ConfirmDialogModule, 
     ToastModule, InputTextModule, InputNumberModule, ToolbarModule,
-    SelectModule, PopoverModule 
+    SelectModule, PopoverModule, PasswordModule, CheckboxModule 
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './maintenance-worker.html',
@@ -53,6 +59,7 @@ export class MaintenanceWorker implements OnInit {
   categoriaFilter: CategoryDTO | null = null; 
   estadoFilter: string | null = null;   
 
+  private searchSubject = new Subject<string>();
   private currentRequest: Subscription | null = null;
 
   workerDialog: boolean = false;
@@ -61,23 +68,36 @@ export class MaintenanceWorker implements OnInit {
   submitted: boolean = false;
   dialogTitle: string = '';
 
+  userDialog: boolean = false;
+  newUser: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false };
+
   constructor(
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private workerService: WorkerService,
     private categoryService: CategoryService, 
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef,
+    private userService: UserService 
   ) {}
 
   ngOnInit() {
       this.loading = true;
       this.loadCategoriasForDropdown(); 
+
+      this.searchSubject.pipe(
+        debounceTime(300),        
+        distinctUntilChanged()   
+      ).subscribe((term) => {
+        this.searchTerm = term;  
+        this.dt.reset();          
+      });
   }
 
   loadCategoriasForDropdown() {
       this.categoryService.getCategoriasDTO().subscribe({
           next: (resp) => {
-              this.categorias = resp; 
+              this.categorias = resp;
+              this.cdr.detectChanges(); 
           },
           error: (err) => console.error('Error cargando categorías', err)
       });
@@ -90,7 +110,7 @@ export class MaintenanceWorker implements OnInit {
           apellido: '', 
           dni: '', 
           estado: 'ACTIVO', 
-          categoria: { id: 0, nombre: '', precio_hora_coste: 0, precio_hora_trabajador: 0 } 
+          id_categoria: { id: 0, nombre: '', precio_hora_coste: 0, precio_hora_trabajador: 0 } 
       };
   }
 
@@ -109,12 +129,16 @@ export class MaintenanceWorker implements OnInit {
         const catId = this.categoriaFilter ? this.categoriaFilter.id : 0;
         const estadoVal = this.estadoFilter ? this.estadoFilter : '';
 
-        const requestObservable = (this.searchTerm || catId || estadoVal)
-            ? this.workerService.searchWorker({
-                term: this.searchTerm, 
-                categoriaId: catId, 
-                estado: estadoVal
-              }, page, size)
+        const hasFilters = this.searchTerm || catId > 0 || estadoVal !== '';
+
+        const filterParams: WorkerFilter = {
+            term: this.searchTerm,
+            categoriaId: catId,
+            estado: estadoVal
+        };
+
+        const requestObservable = hasFilters
+            ? this.workerService.searchWorker(filterParams, page, size)
             : this.workerService.getWorkers(page, size);
 
         this.currentRequest = requestObservable.subscribe({
@@ -122,7 +146,7 @@ export class MaintenanceWorker implements OnInit {
                 this.workers = response.content;
                 this.totalRecords = response.totalElements;
                 this.loading = false;
-                this.cdr.detectChanges();
+                this.cdr.detectChanges(); 
             },
             error: () => {
                 this.loading = false;
@@ -145,8 +169,7 @@ export class MaintenanceWorker implements OnInit {
 
   onSearch(event: Event) {
     const value = (event.target as HTMLInputElement).value;
-    this.searchTerm = value;
-    this.dt.reset(); 
+    this.searchSubject.next(value);
   }
 
   openNew() {
@@ -158,11 +181,12 @@ export class MaintenanceWorker implements OnInit {
 
   editWorker(w: Worker) {
     this.worker = { ...w }; 
-    
-    if (this.worker.categoria && this.worker.categoria.id) {
-        const foundCat = this.categorias.find(c => c.id === this.worker.categoria.id);
+    const workerData = w as any;
+    const categoriaData = workerData.id_categoria;
+    if (categoriaData && categoriaData.id) {
+        const foundCat = this.categorias.find(c => c.id === categoriaData.id);
         if (foundCat) {
-            this.worker.categoria = foundCat as unknown as Category;
+            this.worker.id_categoria = foundCat as unknown as Category;
         }
     }
 
@@ -173,26 +197,37 @@ export class MaintenanceWorker implements OnInit {
   saveWorker() {
     this.submitted = true;
     if (!this.worker.nombre.trim()) return;
-    
-    if (!this.worker.categoria || !this.worker.categoria.id) {
+    if (!this.worker.id_categoria || !this.worker.id_categoria.id) {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Debe seleccionar una categoría' });
         return;
     }
+    
+    if (this.worker.id) {
+        this.workerService.update(this.worker).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Operación realizada' });
+                this.workerDialog = false;
+                this.reloadCurrentPage();
+            },
+            error: () => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
+            }
+        });
+    } else {
+        this.workerService.create(this.worker).subscribe({
+            next: (workerCreado) => {
+                this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Trabajador creado. Asigne usuario.' });
+                
+                this.workerDialog = false;
+                this.reloadCurrentPage();
 
-    const request = this.worker.id 
-        ? this.workerService.update(this.worker) 
-        : this.workerService.create(this.worker);
-
-    request.subscribe({
-        next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Operación realizada' });
-            this.workerDialog = false;
-            this.reloadCurrentPage();
-        },
-        error: () => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo guardar' });
-        }
-    });
+                this.openUserCreationDialog(workerCreado);
+            },
+            error: () => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear (Revise consola)' });
+            }
+        });
+    }
   }
 
   deleteWorker(worker: Worker) {
@@ -226,5 +261,42 @@ export class MaintenanceWorker implements OnInit {
     } else {
         this.dt.reset();
     }
+  }
+
+  openUserCreationDialog(workerLinked: Worker) {
+      this.newUser = { 
+          id_trabajador: 0, 
+          usuario: '', 
+          contrasena: '', 
+          rol: false,
+          worker: workerLinked 
+      };
+      this.userDialog = true;
+  }
+
+  saveUser() {
+      if (!this.newUser.usuario || !this.newUser.contrasena) {
+          this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Usuario y contraseña requeridos' });
+          return;
+      }
+
+      this.newUser.id_trabajador = this.newUser.worker ? this.newUser.worker.id : 0;
+
+      console.log('Creando usuario:', this.newUser);
+
+      this.userService.create(this.newUser).subscribe({
+          next: () => {
+              this.messageService.add({ severity: 'success', summary: 'Proceso Finalizado', detail: 'Usuario creado y asignado' });
+              this.userDialog = false;
+          },
+          error: () => {
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Fallo al crear usuario. El trabajador sí se creó.' });
+          }
+      });
+  }
+
+  skipUserCreation() {
+      this.userDialog = false;
+      this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Trabajador creado sin usuario asignado' });
   }
 }

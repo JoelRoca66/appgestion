@@ -14,7 +14,7 @@ export interface PageResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class UserService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/trabajador';
+    private apiUrl = 'http://localhost:8080/usuario';
 
     getUsers(page: number, size: number): Observable<PageResponse<User>> {
         return this.http.get<PageResponse<User>>(`${this.apiUrl}/all`, { params: { page, size } });
@@ -33,7 +33,13 @@ export class UserService {
     }
 
     create(user: User): Observable<User> {
-        return this.http.post<User>(`${this.apiUrl}/add`, user);
+        const aux = {
+            id_trabajador: user.id_trabajador,
+            usuario: user.usuario,
+            rol: user.rol,
+            contrasena: user.contrasena
+        };
+        return this.http.post<User>(`${this.apiUrl}/add`, aux);
     }
 
     update(user: User): Observable<User> {
