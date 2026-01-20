@@ -295,7 +295,6 @@ export class MaintenanceWorker implements OnInit {
       });
   }
 
-  
   skipUserCreation() {
       this.userDialog = false;
       this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Trabajador creado sin usuario asignado' });
