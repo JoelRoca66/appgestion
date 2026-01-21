@@ -14,8 +14,8 @@ export class Sidebar implements OnInit {
 
   ngOnInit() {
     this.items = [
-      { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/dashboard'] },
-      { label: 'Mantenimiento', icon: 'pi pi-wrench', routerLink: ['/mantenimiento'] },
+      { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/admin/dashboard'] },
+      { label: 'Mantenimiento', icon: 'pi pi-wrench', routerLink: ['/admin/mantenimiento'] },
       { label: 'Configuración', icon: 'pi pi-cog', routerLink: ['/settings'] }
     ]
   }

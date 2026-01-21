@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
@@ -12,10 +12,13 @@ import { User } from '../../../core/models/user.model';
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-export class AdminDashboard {
+export class AdminDashboard implements OnInit {
   users: User[] = [];
 
   getSeverity(status: string): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" {
     return status === 'Alta' ? 'success' : 'danger';
+  }
+
+  ngOnInit() {
   }
 }

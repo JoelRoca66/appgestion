@@ -30,15 +30,15 @@ export const routes: Routes = [
             // { path: 'mantenimiento/tareas', component: MaintenanceTask, canActivate: [adminGuard] },
             // { path: 'mantenimiento/usuarios', component: MaintenanceUser, canActivate: [adminGuard] },
             // { path: 'mantenimiento/materiales', component: MaintenanceMaterial, canActivate: [adminGuard] }
-            { path: 'admin', component: AdminDashboard },
-            { path: 'mantenimiento', component: Maintenance },
-            { path: 'mantenimiento/categorias', component: MaintenanceCategory },
-            { path: 'mantenimiento/trabajadores', component: MaintenanceWorker },
-            { path: 'mantenimiento/proyectos', component: MaintenanceProject },
-            { path: 'mantenimiento/registros', component: MaintenanceRecord },
-            { path: 'mantenimiento/tareas', component: MaintenanceTask },
-            { path: 'mantenimiento/usuarios', component: MaintenanceUser },
-            { path: 'mantenimiento/materiales', component: MaintenanceMaterial }
+            { path: 'admin/dashboard', component: AdminDashboard },
+            { path: 'admin/mantenimiento', component: Maintenance },
+            { path: 'admin/mantenimiento/categorias', component: MaintenanceCategory },
+            { path: 'admin/mantenimiento/trabajadores', component: MaintenanceWorker },
+            { path: 'admin/mantenimiento/proyectos', component: MaintenanceProject },
+            { path: 'admin/mantenimiento/registros', component: MaintenanceRecord },
+            { path: 'admin/mantenimiento/tareas', component: MaintenanceTask },
+            { path: 'admin/mantenimiento/usuarios', component: MaintenanceUser },
+            { path: 'admin/mantenimiento/materiales', component: MaintenanceMaterial }
 
         ]
     },
