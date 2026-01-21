@@ -24,7 +24,7 @@ import { User } from '../../../core/models/user.model';
   providers: [MessageService],
   templateUrl: './maintenance-user.html',
   styleUrl: './maintenance-user.css',
-  changeDetection: ChangeDetectionStrategy.OnPush // <--- ESTRATEGIA ONPUSH
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MaintenanceUser implements OnInit {
 
@@ -56,7 +56,6 @@ export class MaintenanceUser implements OnInit {
   loadUsers(event: TableLazyLoadEvent) {
     this.lastTableEvent = event;
 
-    // Eliminado setTimeout
     this.loading = true;
     
     if (this.currentRequest) {
@@ -75,11 +74,11 @@ export class MaintenanceUser implements OnInit {
         this.usuarios = response.content;
         this.totalRecords = response.totalElements;
         this.loading = false;
-        this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+        this.cdr.markForCheck(); 
       },
       error: () => {
         this.loading = false;
-        this.cdr.markForCheck(); // <--- ACTUALIZACIÓN MANUAL
+        this.cdr.markForCheck(); 
       }
     });
   }

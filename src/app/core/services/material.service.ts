@@ -21,15 +21,15 @@ export class MaterialService {
             .set('page', page.toString())
             .set('size', size.toString());
 
-        return this.http.get<PageResponse<Material>>(`${this.apiUrl}/page`, { params });
+        return this.http.get<PageResponse<Material>>(`${this.apiUrl}/all`, { params });
     }
 
     searchMaterial(filter: MaterialFilter, page: number, size: number): Observable<PageResponse<Material>> {
         let params = new HttpParams()
             .set('texto', filter.texto)
-            .set('stock_maximo', filter.stock_maximo ? filter.stock_maximo.toString() : '')
-            .set('precio_minimo', filter.precio_minimo ? filter.precio_minimo.toString() : '')
-            .set('precio_maximo', filter.precio_maximo ? filter.precio_maximo.toString() : '')
+            .set('stock_maximo', filter.stock_maximo ? filter.stock_maximo.toString() : 0)
+            .set('precio_minimo', filter.precio_minimo ? filter.precio_minimo.toString() : 0)
+            .set('precio_maximo', filter.precio_maximo ? filter.precio_maximo.toString() : 0)
             .set('page', page.toString())
             .set('size', size.toString());
 

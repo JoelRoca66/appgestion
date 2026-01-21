@@ -4,7 +4,7 @@
 <div class="grid">
     <div class="col-12">
         <div class="card shadow-2 border-round p-4 surface-card">
-
+            <h1 class="m-0 text-900 font-bold">Gestión de Materiales</h1>
             <p-table #dt [value]="materials" [lazy]="true" (onLazyLoad)="loadMaterials($event)"
                 [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
                 [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '60rem' }"
@@ -12,40 +12,64 @@
 
                 <ng-template pTemplate="caption">
                     <div class="flex align-items-center justify-content-between flex-wrap gap-2">
-                        <h3 class="m-0 text-900 font-bold">Gestión de Materiales</h3>
 
-                        <div class="flex gap-2 align-items-center">
-                            
-                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary" (click)="op.toggle($event)"></p-button>
-                            
+                        <div class="flex gap-2 align-items-center flex-wrap">
+                            <p-button label="Filtros" icon="pi pi-filter" severity="secondary"
+                                (click)="op.toggle($event)"></p-button>
+
                             <p-popover #op [style]="{width: '320px'}">
-                                <ng-template pTemplate>
-                                    <div class="flex flex-column gap-3">
-                                        <div class="flex flex-column gap-2">
-                                            <label class="font-bold">Nº Factura</label>
-                                            <input pInputText [(ngModel)]="facturaFilter" placeholder="Ej: FAC-001" class="w-full"/>
-                                        </div>
-                                        <div class="flex flex-column gap-2">
-                                            <label class="font-bold">Referencia</label>
-                                            <input pInputText [(ngModel)]="referenciaFilter" placeholder="Ej: REF-123" class="w-full"/>
-                                        </div>
-                                        <div class="flex justify-content-end gap-2 mt-2">
-                                            <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true" (click)="clearFilters(); op.hide()"></p-button>
-                                            <p-button label="Aplicar" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
-                                        </div>
+                                <div class="flex flex-column gap-3 p-3">
+                                    <div class="flex flex-column gap-2">
+                                        <label class="font-bold">Stock Máximo</label>
+                                        <p-inputNumber [(ngModel)]="stockMaximoFilter" [showButtons]="true"
+                                            mode="decimal" [min]="0" [max]="999999" [style]="{'width':'100%'}" 
+                                            placeholder="Cantidad máxima">
+                                        </p-inputNumber>
                                     </div>
-                                </ng-template>
+
+                                    <div class="flex flex-column gap-2">
+                                        <label class="font-bold">Precio Mínimo</label>
+                                        <p-inputNumber [(ngModel)]="precioMinimoFilter" mode="currency" currency="EUR"
+                                            locale="es-ES" [min]="0" [style]="{'width':'100%'}"
+                                            placeholder="0,00 €">
+                                        </p-inputNumber>
+                                    </div>
+
+                                    <div class="flex flex-column gap-2">
+                                        <label class="font-bold">Precio Máximo</label>
+                                        <p-inputNumber [(ngModel)]="precioMaximoFilter" mode="currency" currency="EUR"
+                                            locale="es-ES" [min]="0" [style]="{'width':'100%'}"
+                                            placeholder="0,00 €">
+                                        </p-inputNumber>
+                                    </div>
+
+                                    <div class="flex justify-content-end gap-2 mt-2">
+                                        <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true"
+                                            (click)="clearFilters(); op.hide()"></p-button>
+                                        <p-button label="Aplicar" icon="pi pi-check"
+                                            (click)="applyFilters(); op.hide()"></p-button>
+                                    </div>
+                                </div>
                             </p-popover>
 
+                            @for (filter of activeFilters; track filter.key) {
+                            <p-chip [label]="filter.label" [removable]="false"
+                                class="ml-2 border-primary text-primary surface-overlay text-sm font-bold">
+                                <i class="pi pi-filter mr-2 text-xs"></i>
+                            </p-chip>
+                            }
+                        </div>
+
+                        <div class="flex gap-2 align-items-center">
                             <span class="p-input-icon-left" style="position: relative; display: block;">
                                 <i class="pi pi-search"
                                     style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary);">
                                 </i>
                                 <input pInputText type="text" (input)="onSearch($event)"
-                                    placeholder="Buscar por nombre..." style="padding-left: 3rem; width: 100%;" />
+                                    placeholder="Buscar..." style="padding-left: 3rem; width: 100%;" />
                             </span>
 
-                            <p-button label="Nuevo" icon="pi pi-plus" severity="success" (click)="openNew()">
+                            <p-button label="Nueva" icon="pi pi-plus" severity="success" (click)="openNew()">
                             </p-button>
                         </div>
                     </div>
@@ -67,10 +91,11 @@
                         <td><span class="font-bold">{{ mat.nombre }}</span></td>
                         <td>{{ mat.referencia }}</td>
                         <td>{{ mat.num_factura || '-' }}</td>
-                        <td>{{ mat.precio_unitario | number:'1.2-2' }} €</td>
+                        <td>{{ mat.precio_unitario | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>
-                            <span [class]="'customer-badge status-' + (mat.stock > 10 ? 'instock' : (mat.stock > 0 ? 'lowstock' : 'outofstock'))"
-                                  style="padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700;">
+                            <span
+                                [class]="'customer-badge status-' + (mat.stock > 10 ? 'instock' : (mat.stock > 0 ? 'lowstock' : 'outofstock'))"
+                                style="padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700;">
                                 {{ mat.stock }}
                             </span>
                         </td>
@@ -89,61 +114,40 @@
     </div>
 </div>
 
-<p-dialog 
-    [(visible)]="materialDialog" 
-    [style]="{ width: '750px', 'max-width': '95vw' }" 
-    [header]="dialogTitle" 
-    [modal]="true"
-    styleClass="p-fluid"
-    [contentStyle]="{'overflow': 'visible'}"
-    [draggable]="false" 
-    [resizable]="false">
+<p-dialog [(visible)]="materialDialog" [style]="{ width: '450px' }" [header]="dialogTitle" [modal]="true"
+    styleClass="p-fluid" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
 
     <ng-template pTemplate="content">
-        <div class="field mb-4 flex flex-column gap-2">
+        <div class="field mb-3">
             <label for="nombre" class="font-bold">Nombre del Material</label>
             <input type="text" pInputText id="nombre" [(ngModel)]="material.nombre" required autofocus />
-            <small class="p-error block mt-1" *ngIf="submitted && !material.nombre">El nombre es obligatorio.</small>
+            <small class="p-error block mt-1" *ngIf="submitted && !material.nombre">Requerido.</small>
+        </div>
+
+        <div class="field mb-3">
+            <label for="referencia" class="font-bold">Referencia</label>
+            <input type="text" pInputText id="referencia" [(ngModel)]="material.referencia" required />
+            <small class="p-error block mt-1" *ngIf="submitted && !material.referencia">Requerido.</small>
+        </div>
+
+        <div class="field mb-3">
+            <label for="factura" class="font-bold">Nº Factura</label>
+            <input type="text" pInputText id="factura" [(ngModel)]="material.numero_factura" />
         </div>
 
         <div class="formgrid grid">
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="referencia" class="font-bold">Referencia</label>
-                <input type="text" pInputText id="referencia" [(ngModel)]="material.referencia" required />
-                <small class="p-error block mt-1" *ngIf="submitted && !material.referencia">Requerido.</small>
-            </div>
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="factura" class="font-bold">Nº Factura</label>
-                <input type="text" pInputText id="factura" [(ngModel)]="material.num_factura" />
-            </div>
-        </div>
-
-        <div class="formgrid grid mt-3">
-            <div class="field col-6 flex flex-column gap-2">
+            <div class="field col-6">
                 <label for="precio" class="font-bold">Precio Unitario</label>
-                <p-inputNumber 
-                    id="precio" 
-                    [(ngModel)]="material.precio_unitario" 
-                    mode="currency" 
-                    currency="EUR" 
-                    locale="es-ES"
-                    [min]="0">
+                <p-inputNumber id="precio" [(ngModel)]="material.precio_unitario" mode="currency" currency="EUR"
+                    locale="es-ES" [min]="0">
                 </p-inputNumber>
             </div>
-            <div class="field col-6 flex flex-column gap-2">
+            <div class="field col-6">
                 <label for="stock" class="font-bold">Stock</label>
-                <p-inputNumber 
-                    id="stock" 
-                    [(ngModel)]="material.stock" 
-                    mode="decimal" 
-                    [showButtons]="true" 
-                    [min]="0"
-                    buttonLayout="horizontal"
-                    decrementButtonClass="p-button-danger"
-                    incrementButtonClass="p-button-success"
-                    incrementButtonIcon="pi pi-plus" 
-                    decrementButtonIcon="pi pi-minus"
-                    [inputStyle]="{'text-align': 'center'}">
+                <p-inputNumber id="stock" [(ngModel)]="material.stock" mode="decimal" [showButtons]="true" [min]="0"
+                    buttonLayout="horizontal" decrementButtonClass="p-button-danger"
+                    incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
+                    decrementButtonIcon="pi pi-minus" [inputStyle]="{'text-align': 'center'}">
                 </p-inputNumber>
             </div>
         </div>

@@ -3,15 +3,14 @@
 <div class="grid">
     <div class="col-12">
         <div class="card shadow-2 border-round p-4 surface-card">
-
-            <p-table #dt [value]="usuarios" [lazy]="true" (onLazyLoad)="loadUsers($event)"
-                [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
-                [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '50rem' }"
-                styleClass="p-datatable-striped" dataKey="id">
+            <h1 class="m-0 text-900 font-bold">Gestión de Usuarios</h1>
+            <p-table #dt [value]="usuarios" [lazy]="true" (onLazyLoad)="loadUsers($event)" [totalRecords]="totalRecords"
+                [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 20]"
+                [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-striped" dataKey="id">
 
                 <ng-template pTemplate="caption">
                     <div class="flex align-items-center justify-content-between flex-wrap gap-2">
-                        <h3 class="m-0 text-900 font-bold">Gestión de Usuarios</h3>
+
 
                         <div class="flex gap-2 align-items-center">
                             <span class="p-input-icon-left" style="position: relative; display: block;">
@@ -56,7 +55,7 @@
     styleClass="p-fluid">
 
     <ng-template pTemplate="content">
-        
+
         <div class="field mb-4 flex flex-column gap-2">
             <label for="usuario" class="font-bold">Usuario</label>
             <input type="text" pInputText id="usuario" [(ngModel)]="user.usuario" required autofocus />
@@ -65,26 +64,17 @@
 
         <div class="field mb-4 flex flex-column gap-2">
             <label for="password" class="font-bold">Contraseña</label>
-            
-            <p-password 
-                id="password" 
-                [(ngModel)]="user.contrasena" 
-                [feedback]="false" 
-                [toggleMask]="true"
-                placeholder="Contraseña"
-                [style]="{'width':'100%'}"
-                [inputStyle]="{'width':'100%'}">
+
+            <p-password id="password" [(ngModel)]="user.contrasena" [feedback]="false" [toggleMask]="true"
+                placeholder="Contraseña" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
             </p-password>
 
-            <small class="p-error block mt-1" *ngIf="submitted && !user.contrasena">La contraseña es obligatoria.</small>
+            <small class="p-error block mt-1" *ngIf="submitted && !user.contrasena">La contraseña es
+                obligatoria.</small>
         </div>
 
         <div class="field mb-4 flex align-items-center gap-2">
-            <p-checkbox 
-                id="isAdmin" 
-                [(ngModel)]="user.rol" 
-                [binary]="true" 
-                inputId="adminCheck">
+            <p-checkbox id="isAdmin" [(ngModel)]="user.rol" [binary]="true" inputId="adminCheck">
             </p-checkbox>
             <label for="adminCheck" class="font-bold cursor-pointer">Es Administrador</label>
         </div>
@@ -93,7 +83,6 @@
     <ng-template pTemplate="footer">
         <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
             (click)="hideDialog()"></button>
-        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
-            (click)="saveUser()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text" (click)="saveUser()"></button>
     </ng-template>
 </p-dialog>
