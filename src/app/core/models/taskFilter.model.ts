@@ -1,11 +1,11 @@
 export interface TaskFilter {
-    term: string;
+    texto: string;
     tipo?: string;
     estado?: string;
-    fechaInicioDesde?: Date;
-    fechaInicioHasta?: Date;
-    fechaFinDesde?: Date;
-    fechaFinHasta?: Date;
+    fecha_inicio_desde?: Date;
+    fecha_inicio_hasta?: Date;
+    fecha_fin_desde?: Date;
+    fecha_fin_hasta?: Date;
     padre?: number;
     proyecto?: number;
 }

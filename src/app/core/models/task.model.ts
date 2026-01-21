@@ -17,8 +17,8 @@ export interface Task {
     observaciones?: string;
 
     horasEstimadas: number;
-    fechaIni?: Date;
-    fechaFin?: Date;
+    fecha_ini?: Date;
+    fecha_fin?: Date;
 
     padre?: TaskLite;
     proyecto: Project;
