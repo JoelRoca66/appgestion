@@ -35,13 +35,14 @@ export class WorkerService {
         );
     }
 
-    create(worker: Worker): Observable<Worker> {
+    create(worker: Worker, rol: boolean): Observable<Worker> {
         const aux = {
             nombre: worker.nombre,
             apellido: worker.apellido,
             dni: worker.dni,
             estado: worker.estado,
-            id_categoria: worker.id_categoria.id
+            id_categoria: worker.id_categoria.id,
+            rol: rol
         }
         return this.http.post<Worker>(`${this.apiUrl}/add`, aux);
     }

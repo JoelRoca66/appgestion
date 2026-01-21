@@ -25,8 +25,6 @@ import { CategoryService } from '../../../core/services/category.service';
 import { Worker } from '../../../core/models/worker.model';
 import { Category, CategoryDTO } from '../../../core/models/category.model';
 import { WorkerFilter } from '../../../core/models/workerFilter.model';
-import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../core/models/user.model';
 
 interface ActiveFilter {
     key: string;
@@ -64,6 +62,7 @@ export class MaintenanceWorker implements OnInit {
     totalRecords: number = 0;
 
     loading: boolean = false;
+    rol: boolean = false;
 
     lastTableEvent: TableLazyLoadEvent | null = null;
     searchTerm: string = '';
@@ -80,16 +79,13 @@ export class MaintenanceWorker implements OnInit {
     submitted: boolean = false;
     dialogTitle: string = '';
 
-    userDialog: boolean = false;
-    newUser: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false };
 
     constructor(
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private workerService: WorkerService,
         private categoryService: CategoryService,
-        private cdr: ChangeDetectorRef,
-        private userService: UserService
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit() {
@@ -262,14 +258,13 @@ export class MaintenanceWorker implements OnInit {
                 }
             });
         } else {
-            this.workerService.create(this.worker).subscribe({
+            this.workerService.create(this.worker, this.rol).subscribe({
                 next: (workerCreado) => {
                     this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Trabajador creado. Asigne usuario.' });
 
                     this.workerDialog = false;
                     this.reloadCurrentPage();
 
-                    this.openUserCreationDialog(workerCreado);
                     this.cdr.markForCheck();
                 },
                 error: () => {
@@ -316,43 +311,4 @@ export class MaintenanceWorker implements OnInit {
         }
     }
 
-    openUserCreationDialog(workerLinked: Worker) {
-        this.newUser = {
-            id_trabajador: 0,
-            usuario: '',
-            contrasena: '',
-            rol: false,
-            worker: workerLinked
-        };
-        this.userDialog = true;
-        this.cdr.markForCheck();
-    }
-
-    saveUser() {
-        if (!this.newUser.usuario || !this.newUser.contrasena) {
-            this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Usuario y contraseña requeridos' });
-            this.cdr.markForCheck();
-            return;
-        }
-
-        this.newUser.id_trabajador = this.newUser.worker ? this.newUser.worker.id : 0;
-
-        this.userService.create(this.newUser).subscribe({
-            next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Proceso Finalizado', detail: 'Usuario creado y asignado' });
-                this.userDialog = false;
-                this.cdr.markForCheck();
-            },
-            error: () => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Fallo al crear usuario. El trabajador sí se creó.' });
-                this.cdr.markForCheck();
-            }
-        });
-    }
-
-    skipUserCreation() {
-        this.userDialog = false;
-        this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Trabajador creado sin usuario asignado' });
-        this.cdr.markForCheck();
-    }
 }
