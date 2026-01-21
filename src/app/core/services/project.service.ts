@@ -15,7 +15,7 @@ export interface PageResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:8080/project';
+    private apiUrl = 'http://localhost:8080/proyecto';
 
     getProjects(page: number, size: number): Observable<PageResponse<Project>> {
         return this.http.get<PageResponse<Project>>(`${this.apiUrl}/all`, { params: { page, size } });
@@ -36,11 +36,11 @@ export class ProjectService {
     }
 
     createProject(project: Project): Observable<Project> {
-        return this.http.post<Project>(`${this.apiUrl}/create`, project);
+        return this.http.post<Project>(`${this.apiUrl}/add`, project);
     }
 
     updateProject(project: Project): Observable<Project> {
-        return this.http.put<Project>(`${this.apiUrl}/update/${project.id}`, project);
+        return this.http.put<Project>(`${this.apiUrl}/update`, project);
     }
 
     deleteProject(id: number): Observable<void> {

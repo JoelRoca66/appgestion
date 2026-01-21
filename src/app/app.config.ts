@@ -16,7 +16,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
     
-    // 👇 AGREGAR ESTO:
     provideAnimationsAsync(),
     provideHttpClient(withFetch()),
     providePrimeNG({
