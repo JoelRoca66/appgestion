@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
-import { CommonModule, registerLocaleData } from '@angular/common'; // 👈 1. Importar registerLocaleData
+import { CommonModule, registerLocaleData } from '@angular/common'; 
 import { FormsModule } from '@angular/forms';
 import { Subscription, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, delay, finalize, takeUntil } from 'rxjs/operators';

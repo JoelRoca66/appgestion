@@ -90,7 +90,7 @@
                     <tr>
                         <td><span class="font-bold">{{ mat.nombre }}</span></td>
                         <td>{{ mat.referencia }}</td>
-                        <td>{{ mat.num_factura || '-' }}</td>
+                        <td>{{ mat.numero_factura || '-' }}</td>
                         <td>{{ mat.precio_unitario | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>
                             <span
@@ -118,36 +118,39 @@
     styleClass="p-fluid" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
 
     <ng-template pTemplate="content">
-        <div class="field mb-3">
+        <div class="field mb-3 flex flex-column gap-2">
             <label for="nombre" class="font-bold">Nombre del Material</label>
             <input type="text" pInputText id="nombre" [(ngModel)]="material.nombre" required autofocus />
-            <small class="p-error block mt-1" *ngIf="submitted && !material.nombre">Requerido.</small>
+            <small class="p-error block" *ngIf="submitted && !material.nombre">Requerido.</small>
         </div>
 
-        <div class="field mb-3">
+        <div class="field mb-3 flex flex-column gap-2">
             <label for="referencia" class="font-bold">Referencia</label>
             <input type="text" pInputText id="referencia" [(ngModel)]="material.referencia" required />
-            <small class="p-error block mt-1" *ngIf="submitted && !material.referencia">Requerido.</small>
+            <small class="p-error block" *ngIf="submitted && !material.referencia">Requerido.</small>
         </div>
 
-        <div class="field mb-3">
+        <div class="field mb-3 flex flex-column gap-2">
             <label for="factura" class="font-bold">Nº Factura</label>
             <input type="text" pInputText id="factura" [(ngModel)]="material.numero_factura" />
         </div>
 
         <div class="formgrid grid">
-            <div class="field col-6">
+            <div class="field col-6 flex flex-column gap-2">
                 <label for="precio" class="font-bold">Precio Unitario</label>
                 <p-inputNumber id="precio" [(ngModel)]="material.precio_unitario" mode="currency" currency="EUR"
-                    locale="es-ES" [min]="0">
+                    locale="es-ES" [min]="0" [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}">
                 </p-inputNumber>
             </div>
-            <div class="field col-6">
+            
+            <div class="field col-6 flex flex-column gap-2">
                 <label for="stock" class="font-bold">Stock</label>
                 <p-inputNumber id="stock" [(ngModel)]="material.stock" mode="decimal" [showButtons]="true" [min]="0"
                     buttonLayout="horizontal" decrementButtonClass="p-button-danger"
                     incrementButtonClass="p-button-success" incrementButtonIcon="pi pi-plus"
-                    decrementButtonIcon="pi pi-minus" [inputStyle]="{'text-align': 'center'}">
+                    decrementButtonIcon="pi pi-minus" 
+                    [style]="{'width':'100%'}" 
+                    [inputStyle]="{'width':'100%', 'text-align': 'center'}">
                 </p-inputNumber>
             </div>
         </div>
