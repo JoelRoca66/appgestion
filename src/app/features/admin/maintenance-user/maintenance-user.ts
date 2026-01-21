@@ -39,7 +39,7 @@ export class MaintenanceUser implements OnInit {
   private currentRequest: Subscription | null = null;
 
   userDialog: boolean = false;
-  user: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false };
+  user: User = { id_trabajador: 0, usuario: '', contrasena: '', rol: false, cambio_contrasena: false };
   submitted: boolean = false;
   dialogTitle: string = '';
 

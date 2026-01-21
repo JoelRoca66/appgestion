@@ -5,6 +5,7 @@ export interface User {
     usuario: string;
     rol: boolean;
     contrasena: string;
+    cambio_contrasena: boolean;
 
     worker?: Worker;
 }
