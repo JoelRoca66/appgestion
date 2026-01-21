@@ -4,8 +4,8 @@
 <div class="grid">
     <div class="col-12">
         <div class="card shadow-2 border-round p-4 surface-card">
-            <h1 class="m-0 text-900 font-bold">Gestión de Proyectos</h1>
-            
+            <h1 class="m-0 text-900 font-bold mb-4">Gestión de Proyectos</h1>
+
             <p-table #dt [value]="projects" [lazy]="true" (onLazyLoad)="loadProjects($event)"
                 [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
                 [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '60rem' }"
@@ -18,36 +18,58 @@
                             <p-button label="Filtros" icon="pi pi-filter" severity="secondary"
                                 (click)="op.toggle($event)"></p-button>
 
-                            <p-popover #op [style]="{width: '350px'}">
-                                <div class="flex flex-column gap-3 p-3">
-                                    <div class="flex flex-column gap-2">
-                                        <label class="font-bold">Estado</label>
+                            <p-popover #op [style]="{width: '400px'}">
+                                <div class="flex flex-column gap-3 p-3 p-fluid">
+                                    <div class="field mb-0">
+                                        <label class="font-bold block mb-2">Estado</label>
                                         <p-select [options]="estados" [(ngModel)]="filterEstado" placeholder="Todos"
                                             [showClear]="true" optionLabel="label" optionValue="value" appendTo="body"
-                                            [style]="{'width':'100%'}">
+                                            styleClass="w-full">
                                         </p-select>
                                     </div>
 
-                                    <div class="flex flex-column gap-2">
-                                        <label class="font-bold">Margen Beneficio Min (%)</label>
-                                        <p-inputNumber [(ngModel)]="filterMargenMin" suffix="%" [min]="0" [max]="100" 
-                                            placeholder="0" styleClass="w-full"></p-inputNumber>
+                                    <div class="field mb-0">
+                                        <label class="font-bold block mb-2">Margen Beneficio Min (%)</label>
+                                        <p-inputNumber [(ngModel)]="filterMargenMin" suffix="%" [min]="0" [max]="100"
+                                            placeholder="0" styleClass="w-full" class="w-full">
+                                        </p-inputNumber>
                                     </div>
 
-                                    <div class="grid">
-                                        <div class="col-6 flex flex-column gap-2">
-                                            <label class="font-bold text-sm">Inicio (Desde)</label>
-                                            <p-datepicker [(ngModel)]="filterFechaIniDesde" appendTo="body" 
-                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+                                    <div class="formgrid grid">
+                                        <div class="field col-6 mb-0">
+                                            <label class="font-bold block mb-2 text-sm">Inicio (Desde)</label>
+                                            <p-datepicker [(ngModel)]="filterFechaIniDesde" appendTo="body"
+                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                                [inputStyle]="{'width':'100%'}">
+                                            </p-datepicker>
                                         </div>
-                                        <div class="col-6 flex flex-column gap-2">
-                                            <label class="font-bold text-sm">Inicio (Hasta)</label>
+                                        <div class="field col-6 mb-0">
+                                            <label class="font-bold block mb-2 text-sm">Inicio (Hasta)</label>
                                             <p-datepicker [(ngModel)]="filterFechaIniHasta" appendTo="body"
-                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"></p-datepicker>
+                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                                [inputStyle]="{'width':'100%'}">
+                                            </p-datepicker>
                                         </div>
                                     </div>
 
-                                    <div class="flex justify-content-end gap-2 mt-2">
+                                    <div class="formgrid grid mt-2">
+                                        <div class="field col-6 mb-0">
+                                            <label class="font-bold block mb-2 text-sm">Fin (Desde)</label>
+                                            <p-datepicker [(ngModel)]="filterFechaFinDesde" appendTo="body"
+                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                                [inputStyle]="{'width':'100%'}">
+                                            </p-datepicker>
+                                        </div>
+                                        <div class="field col-6 mb-0">
+                                            <label class="font-bold block mb-2 text-sm">Fin (Hasta)</label>
+                                            <p-datepicker [(ngModel)]="filterFechaFinHasta" appendTo="body"
+                                                dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                                [inputStyle]="{'width':'100%'}">
+                                            </p-datepicker>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex justify-content-end gap-2 mt-2 pt-2 border-top-1 surface-border">
                                         <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true"
                                             (click)="clearFilters(); op.hide()"></p-button>
                                         <p-button label="Aplicar" icon="pi pi-check"
@@ -57,20 +79,21 @@
                             </p-popover>
 
                             @for (filter of activeFilters; track filter.key) {
-                                <p-chip [label]="filter.label" [removable]="false"
-                                    class="ml-2 border-primary text-primary surface-overlay text-sm font-bold">
-                                    <i class="pi pi-filter mr-2 text-xs"></i>
-                                </p-chip>
+                            <p-chip [label]="filter.label" [removable]="false"
+                                class="ml-2 border-primary text-primary surface-overlay text-sm font-bold">
+                                <i class="pi pi-filter mr-2 text-xs"></i>
+                            </p-chip>
                             }
                         </div>
 
                         <div class="flex gap-2 align-items-center">
+
                             <span class="p-input-icon-left" style="position: relative; display: block;">
                                 <i class="pi pi-search"
                                     style="position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--text-color-secondary);">
                                 </i>
                                 <input pInputText type="text" (input)="onSearch($event)"
-                                    placeholder="Buscar proyecto..." style="padding-left: 3rem; width: 100%;" />
+                                    placeholder="Buscar por nombre..." style="padding-left: 3rem; width: 100%;" />
                             </span>
 
                             <p-button label="Nuevo" icon="pi pi-plus" severity="success" (click)="openNew()">
@@ -81,12 +104,16 @@
 
                 <ng-template pTemplate="header">
                     <tr>
-                        <th style="width:20%">Nombre</th>
-                        <th style="width:15%">Estado</th>
-                        <th style="width:15%">Fecha Inicio</th>
+                        <th style="width:35%">Nombre</th>
+
+                        <th style="width:10%">Estado</th>
+                        <th style="width:10%">Fecha Inicio</th>
+                        <th style="width:10%">Fecha Fin</th>
                         <th style="width:10%">Margen</th>
-                        <th style="width:20%">Progreso</th>
-                        <th style="width:20%">Acciones</th>
+
+                        <th style="width:15%">Progreso</th>
+
+                        <th style="width:10%; text-align: center">Acciones</th>
                     </tr>
                 </ng-template>
 
@@ -95,28 +122,23 @@
                         <td>
                             <div class="flex flex-column">
                                 <span class="font-bold">{{ p.nombre }}</span>
-                                <span class="text-500 text-sm">{{ p.descripcion | slice:0:30 }}{{p.descripcion?.length > 30 ? '...' : ''}}</span>
+                                <span class="text-500 text-sm">{{ p.descripcion | slice:0:30 }}{{p.descripcion?.length >
+                                    30 ? '...' : ''}}</span>
                             </div>
                         </td>
-
-                        <td>
-                            <p-tag [value]="p.estado" [severity]="getSeverity(p.estado)"></p-tag>
-                        </td>
-
-                        <td>{{ p.fechaIni | date: 'dd/MM/yyyy' }}</td>
-
-                        <td>{{ p.margenBeneficio }}%</td>
-
+                        <td><p-tag [value]="p.estado" [severity]="getSeverity(p.estado)"></p-tag></td>
+                        <td>{{ p.fecha_ini | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ p.fecha_fin | date: 'dd/MM/yyyy' }}</td>
+                        <td>{{ p.margen_beneficio }}%</td>
                         <td>
                             <div class="flex align-items-center gap-2" *ngIf="p.totalTareas > 0; else noTasks">
-                                <p-progressBar [value]="getProgreso(p)" [showValue]="false" styleClass="h-1rem w-6rem"></p-progressBar>
+                                <p-progressBar [value]="getProgreso(p)" [showValue]="false"
+                                    styleClass="h-1rem w-6rem"></p-progressBar>
                                 <span class="text-sm">{{ p.tareasCompletadas }}/{{ p.totalTareas }}</span>
                             </div>
-                            <ng-template #noTasks>
-                                <span class="text-500 text-sm font-italic">Sin tareas</span>
-                            </ng-template>
+                            <ng-template #noTasks><span class="text-500 text-sm font-italic">Sin
+                                    tareas</span></ng-template>
                         </td>
-
                         <td>
                             <div class="flex gap-2">
                                 <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
@@ -136,45 +158,52 @@
     styleClass="p-fluid" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
 
     <ng-template pTemplate="content">
+        <div class="flex flex-column gap-3 pt-2">
 
-        <div class="field mb-3 flex flex-column gap-2">
-            <label for="nombre" class="font-bold">Nombre del Proyecto</label>
-            <input type="text" pInputText id="nombre" [(ngModel)]="project.nombre" required autofocus />
-            <small class="p-error block" *ngIf="submitted && !project.nombre">Requerido.</small>
-        </div>
-
-        <div class="field mb-3 flex flex-column gap-2">
-            <label for="descripcion" class="font-bold">Descripción</label>
-            <textarea id="descripcion" pTextarea [(ngModel)]="project.descripcion" rows="3" [autoResize]="true"></textarea>
-        </div>
-
-        <div class="formgrid grid">
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="estado" class="font-bold">Estado</label>
-                <p-select id="estado" [options]="estados" [(ngModel)]="project.estado" optionLabel="label"
-                    optionValue="value" placeholder="Seleccionar" appendTo="body" [style]="{'width':'100%'}">
-                </p-select>
+            <div class="field">
+                <label for="nombre" class="font-bold">Nombre del Proyecto</label>
+                <input type="text" pInputText id="nombre" [(ngModel)]="project.nombre" required autofocus />
+                <small class="p-error block" *ngIf="submitted && !project.nombre">Requerido.</small>
             </div>
 
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="margen" class="font-bold">Margen Beneficio (%)</label>
-                <p-inputNumber id="margen" [(ngModel)]="project.margenBeneficio" suffix="%" [min]="0" [max]="100"></p-inputNumber>
+            <div class="field">
+                <label for="descripcion" class="font-bold">Descripción</label>
+                <textarea id="descripcion" pTextarea [(ngModel)]="project.descripcion" rows="3"
+                    [autoResize]="true"></textarea>
             </div>
+
+            <div class="formgrid grid">
+                <div class="field col-6">
+                    <label for="estado" class="font-bold">Estado</label>
+                    <p-select id="estado" [options]="estados" [(ngModel)]="project.estado" optionLabel="label"
+                        optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-full">
+                    </p-select>
+                </div>
+
+                <div class="field col-6">
+                    <label for="margen" class="font-bold">Margen Beneficio (%)</label>
+                    <p-inputNumber id="margen" [(ngModel)]="project.margen_beneficio" suffix="%" [min]="0" [max]="100"
+                        class="w-full" styleClass="w-full"></p-inputNumber>
+                </div>
+            </div>
+
+            <div class="formgrid grid">
+                <div class="field col-6">
+                    <label for="fecha_ini" class="font-bold">Fecha Inicio</label>
+                    <p-datepicker id="fecha_ini" [(ngModel)]="project.fecha_ini" dateFormat="dd/mm/yy" [showIcon]="true"
+                        appendTo="body" styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-datepicker>
+                    <small class="p-error block" *ngIf="submitted && !project.fecha_ini">Requerido.</small>
+                </div>
+
+                <div class="field col-6">
+                    <label for="fecha_fin" class="font-bold">Fecha Fin</label>
+                    <p-datepicker id="fecha_fin" [(ngModel)]="project.fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true"
+                        appendTo="body" placeholder="Opcional" styleClass="w-full"
+                        [inputStyle]="{'width':'100%'}"></p-datepicker>
+                </div>
+            </div>
+
         </div>
-
-        <div class="formgrid grid mt-2">
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="fechaIni" class="font-bold">Fecha Inicio</label>
-                <p-datepicker id="fechaIni" [(ngModel)]="project.fechaIni" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"></p-datepicker>
-                <small class="p-error block" *ngIf="submitted && !project.fechaIni">Requerido.</small>
-            </div>
-
-            <div class="field col-6 flex flex-column gap-2">
-                <label for="fechaFin" class="font-bold">Fecha Fin</label>
-                <p-datepicker id="fechaFin" [(ngModel)]="project.fechaFin" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body" placeholder="Opcional"></p-datepicker>
-            </div>
-        </div>
-
     </ng-template>
 
     <ng-template pTemplate="footer">

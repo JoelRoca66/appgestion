@@ -25,7 +25,7 @@ export class ProjectService {
         const params = new HttpParams()
             .set('texto', filter.texto)
             .set('estado', filter.estado ? filter.estado : '')
-            .set('margenBeneficioMin', filter.margenBeneficioMin ? filter.margenBeneficioMin.toString().split('T')[0] : '')
+            .set('margenBeneficioMin', filter.margen_beneficio_min ? filter.margen_beneficio_min.toString().split('T')[0] : '')
             .set('fechaInicioDesde', filter.fecha_inicio_desde ? filter.fecha_inicio_desde.toISOString().split('T')[0] : '')
             .set('fechaInicioHasta', filter.fecha_inicio_hasta ? filter.fecha_inicio_hasta.toISOString().split('T')[0] : '')
             .set('fechaFinDesde', filter.fecha_fin_desde ? filter.fecha_fin_desde.toISOString().split('T')[0] : '')

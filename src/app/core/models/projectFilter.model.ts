@@ -5,5 +5,5 @@ export interface ProjectFilter {
     fecha_inicio_hasta?: Date;
     fecha_fin_desde?: Date;
     fecha_fin_hasta?: Date;
-    margenBeneficioMin?: number;
+    margen_beneficio_min?: number;
 }

@@ -3,9 +3,9 @@ export interface Project {
     nombre: string;
     descripcion: string;
     estado: string;
-    fechaIni: Date;
-    fechaFin?: Date;
-    margenBeneficio: number;
+    fecha_ini: Date;
+    fecha_fin: Date;
+    margen_beneficio: number;
     
     totalTareas?: number;
     tareasCompletadas?: number;
