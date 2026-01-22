@@ -31,6 +31,7 @@ import { CategoryService } from '../../../core/services/category.service';
 import { Worker } from '../../../core/models/worker.model';
 import { Category, CategoryDTO } from '../../../core/models/category.model';
 import { WorkerFilter } from '../../../core/models/workerFilter.model';
+import { User } from '../../../core/models/user.model';
 
 interface ActiveFilter {
     key: string;
@@ -68,7 +69,6 @@ export class MaintenanceWorker implements OnInit {
 
     totalRecords = 0;
     loading = false;
-    rol = false;
 
     lastTableEvent: TableLazyLoadEvent | null = null;
 
@@ -82,6 +82,8 @@ export class MaintenanceWorker implements OnInit {
 
     workerDialog = false;
     worker: Worker = this.getEmptyWorker();
+    user: User = this.getEmptyUser();
+    confirmPassword = '';
     submitted = false;
     dialogTitle = '';
 
@@ -133,6 +135,16 @@ export class MaintenanceWorker implements OnInit {
                 precio_hora_coste: 0,
                 precio_hora_trabajador: 0
             }
+        };
+    }
+
+    getEmptyUser(): User {
+        return {
+            id_trabajador: 0,
+            usuario: '',
+            rol: false,
+            contrasena: '',
+            cambio_contrasena: false
         };
     }
 
@@ -227,6 +239,8 @@ export class MaintenanceWorker implements OnInit {
 
     openNew() {
         this.worker = this.getEmptyWorker();
+        this.user = this.getEmptyUser();
+        this.confirmPassword = '';
         this.submitted = false;
         this.dialogTitle = 'Nuevo Trabajador';
         this.workerDialog = true;
@@ -266,10 +280,23 @@ export class MaintenanceWorker implements OnInit {
             this.cdr.markForCheck();
             return;
         }
+        if (!this.worker.id) {
+            if (!this.user.usuario || !this.user.contrasena) {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Usuario y contraseña son obligatorios' });
+                this.cdr.markForCheck();
+                return;
+            }
+
+            if (this.user.contrasena !== this.confirmPassword) {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Las contraseñas no coinciden' });
+                this.cdr.markForCheck();
+                return;
+            }
+        }
 
         const request$ = this.worker.id
             ? this.workerService.update(this.worker)
-            : this.workerService.create(this.worker, this.rol);
+            : this.workerService.create(this.worker, this.user);
 
         request$.subscribe({
             next: () => {

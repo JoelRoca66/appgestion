@@ -3,6 +3,7 @@ import { Worker } from '../models/worker.model';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { WorkerFilter } from '../models/workerFilter.model';
+import { User } from '../models/user.model';
 
 export interface PageResponse<T> {
     content: T[];
@@ -35,14 +36,16 @@ export class WorkerService {
         );
     }
 
-    create(worker: Worker, rol: boolean): Observable<Worker> {
+    create(worker: Worker, user: User): Observable<Worker> {
         const aux = {
             nombre: worker.nombre,
             apellido: worker.apellido,
             dni: worker.dni,
             estado: worker.estado,
             id_categoria: worker.id_categoria.id,
-            rol: rol
+            usuario: user.usuario,
+            rol: user.rol,
+            contrasena: user.contrasena
         }
         return this.http.post<Worker>(`${this.apiUrl}/add`, aux);
     }

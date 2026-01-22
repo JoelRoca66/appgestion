@@ -113,15 +113,17 @@
 
     <ng-template pTemplate="content">
 
-        <div class="field mb-3 flex flex-column gap-2">
-            <label for="nombre" class="font-bold">Nombre</label>
-            <input type="text" pInputText id="nombre" [(ngModel)]="worker.nombre" required autofocus />
-            <small class="p-error block" *ngIf="submitted && !worker.nombre">Requerido.</small>
-        </div>
+        <div class="formgrid grid">
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="nombre" class="font-bold">Nombre</label>
+                <input type="text" pInputText id="nombre" [(ngModel)]="worker.nombre" required autofocus />
+                <small class="p-error block" *ngIf="submitted && !worker.nombre">Requerido.</small>
+            </div>
 
-        <div class="field mb-3 flex flex-column gap-2">
-            <label for="apellido" class="font-bold">Apellido</label>
-            <input type="text" pInputText id="apellido" [(ngModel)]="worker.apellido" />
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="apellido" class="font-bold">Apellido</label>
+                <input type="text" pInputText id="apellido" [(ngModel)]="worker.apellido" />
+            </div>
         </div>
 
         <div class="field mb-3 flex flex-column gap-2">
@@ -151,12 +153,39 @@
 
         @if (!worker.id) {
         <div class="field flex align-items-center gap-2 mt-2">
-            <p-checkbox id="newAdmin" [(ngModel)]="rol" [binary]="true" inputId="adminCheck">
+            <p-checkbox id="newAdmin" [(ngModel)]="user.rol" [binary]="true" inputId="adminCheck">
             </p-checkbox>
             <label for="adminCheck" class="cursor-pointer select-none m-0">Conceder permisos de Administrador</label>
         </div>
-        }
 
+        <div class="field mb-3 flex flex-column gap-2 mt-2">
+            <label for="usuario" class="font-bold">Usuario</label>
+            <input type="text" pInputText id="usuario" [(ngModel)]="user.usuario" required autocomplete="off" />
+            <small class="p-error block" *ngIf="submitted && !user.usuario">Requerido.</small>
+        </div>
+
+        <div class="formgrid grid">
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="contrasena" class="font-bold">Contraseña</label>
+                <p-password id="contrasena" [(ngModel)]="user.contrasena" [toggleMask]="true" [feedback]="true"
+                    promptLabel="Introduce contraseña" weakLabel="Débil" mediumLabel="Media" strongLabel="Fuerte"
+                    [style]="{'width':'100%'}" inputStyleClass="w-full" required>
+                </p-password>
+                <small class="p-error block" *ngIf="submitted && !user.contrasena">Requerido.</small>
+            </div>
+
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="confirmarContrasena" class="font-bold">Confirmar Contraseña</label>
+                <p-password id="confirmarContrasena" [(ngModel)]="confirmPassword" [toggleMask]="true"
+                    [feedback]="false" [style]="{'width':'100%'}" inputStyleClass="w-full">
+                </p-password>
+                <small class="p-error block"
+                    *ngIf="submitted && user.contrasena && confirmPassword && user.contrasena !== confirmPassword">
+                    Las contraseñas no coinciden.
+                </small>
+            </div>
+        </div>
+        }
     </ng-template>
 
     <ng-template pTemplate="footer">
