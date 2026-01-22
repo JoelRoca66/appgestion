@@ -15,7 +15,6 @@ import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 
 import { AuthService } from './../../../core/services/auth.service';
-import { UserService } from './../../../core/services/user.service';
 import { User } from '../../../core/models/user.model';
 
 @Component({
@@ -54,7 +53,6 @@ export class Login {
 
   constructor(
     private authService: AuthService,
-    private userService: UserService,
     private router: Router,
     private messageService: MessageService
   ) { }
@@ -121,7 +119,7 @@ export class Login {
 
     this.user.cambio_contrasena = true;
 
-    this.userService.update(this.user).subscribe({
+    this.authService.updatePassword(this.user).subscribe({
       next: (updatedUser) => {
         this.messageService.add({ severity: 'success', summary: 'Éxito', detail: 'Contraseña actualizada' });
         this.passwordDialog = false;
