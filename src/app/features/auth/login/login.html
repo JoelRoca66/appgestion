@@ -46,3 +46,40 @@
 
     </div>
 </div>
+
+<p-dialog [(visible)]="passwordDialog" [style]="{ width: '450px' }" [header]="dialogTitle" [modal]="true"
+    styleClass="p-fluid" [draggable]="false" [resizable]="false" [contentStyle]="{'overflow': 'visible'}">
+
+    <ng-template pTemplate="content">
+
+        <h3>Es la primera vez que inicias sesión, cambia la contraseña.</h3>
+        <div class="formgrid grid">
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="contrasena" class="font-bold">Contraseña</label>
+                <p-password id="contrasena" [(ngModel)]="user.contrasena" [toggleMask]="true" [feedback]="true"
+                    promptLabel="Introduce contraseña" weakLabel="Débil" mediumLabel="Media" strongLabel="Fuerte"
+                    [style]="{'width':'100%'}" inputStyleClass="w-full" required>
+                </p-password>
+                <small class="p-error block" *ngIf="submitted && !user.contrasena">Requerido.</small>
+            </div>
+
+            <div class="field col-6 flex flex-column gap-2">
+                <label for="confirmarContrasena" class="font-bold">Confirmar Contraseña</label>
+                <p-password id="confirmarContrasena" [(ngModel)]="confirmPassword" [toggleMask]="true"
+                    [feedback]="false" [style]="{'width':'100%'}" inputStyleClass="w-full">
+                </p-password>
+                <small class="p-error block"
+                    *ngIf="submitted && user.contrasena && confirmPassword && user.contrasena !== confirmPassword">
+                    Las contraseñas no coinciden.
+                </small>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+            (click)="hideDialog()"></button>
+        <button pButton pRipple label="Guardar" icon="pi pi-check" class="p-button-text"
+            (click)="savePassword()"></button>
+    </ng-template>
+</p-dialog>
