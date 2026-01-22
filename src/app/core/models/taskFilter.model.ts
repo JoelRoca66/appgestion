@@ -1,5 +1,5 @@
 export interface TaskFilter {
-    texto: string;
+    term: string;
     tipo?: string;
     estado?: string;
     fecha_inicio_desde?: Date;

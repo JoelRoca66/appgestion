@@ -29,11 +29,11 @@ import { DividerModule } from 'primeng/divider';
 import { BadgeModule } from 'primeng/badge';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { TaskService } from '../../../core/services/task.service'; 
-import { ProjectService } from '../../../core/services/project.service'; 
-import { Task } from '../../../core/models/task.model';
-import { TaskFilter } from '../../../core/models/taskFilter.model'; 
-import { Project } from '../../../core/models/project.model';
+import { TaskService } from '../../../core/services/task.service';
+import { ProjectService } from '../../../core/services/project.service';
+import { Task, TaskDTO, TaskListDTO } from '../../../core/models/task.model';
+import { TaskFilter } from '../../../core/models/taskFilter.model';
+import { Project, ProjectDTO } from '../../../core/models/project.model';
 
 interface ActiveFilter {
   key: string;
@@ -59,9 +59,9 @@ export class MaintenanceTask implements OnInit {
 
   @ViewChild('dt') dt!: Table;
 
-  tasks: Task[] = [];
-  projects: Project[] = [];
-  parentCandidates: Task[] = [];
+  tasks: TaskDTO[] = [];
+  projects: ProjectDTO[] = [];
+  parentCandidates: TaskListDTO[] = [];
 
   estados: any[] = [
     { label: 'Pendiente', value: 'PENDIENTE' },
@@ -83,11 +83,15 @@ export class MaintenanceTask implements OnInit {
   loading = false;
   lastTableEvent: TableLazyLoadEvent | null = null;
   searchTerm = '';
+  loadingParents = false;
+
+  filterParentTasks: TaskListDTO[] = []; 
+  loadingFilterParents = false;
 
   filterTipo: string | null = null;
   filterEstado: string | null = null;
-  filterProyecto: Project | null = null;
-  filterPadre: Task | null = null;
+  filterProyecto: ProjectDTO | null = null;
+  filterPadre: TaskListDTO | null = null;
   filterFechaIniDesde: Date | null = null;
   filterFechaIniHasta: Date | null = null;
   filterFechaFinDesde: Date | null = null;
@@ -98,7 +102,7 @@ export class MaintenanceTask implements OnInit {
   private currentRequest: Subscription | null = null;
 
   taskDialog = false;
-  task: Task = this.getEmptyTask();
+  task: TaskDTO = this.getEmptyTask();
   submitted = false;
   dialogTitle = '';
 
@@ -122,41 +126,48 @@ export class MaintenanceTask implements OnInit {
     });
 
     this.loadProjectsList();
-    this.loadParentCandidates();
   }
 
   loadProjectsList() {
-    this.projectService.getProjects(0, 100).subscribe(res => {
-      this.projects = res.content;
+    this.projectService.getAllProjectNames().subscribe(res => {
+      this.projects = res;
       this.cdr.markForCheck();
     });
   }
 
-  loadParentCandidates() {
-    this.taskService.getTasks(0, 1000).subscribe(res => {
-      this.parentCandidates = res.content;
-      this.cdr.markForCheck();
+  loadParentsForProject(projectId: number) {
+    this.loadingParents = true;
+    this.taskService.getAllTaskNamesFromProject(projectId).subscribe({
+        next: (res) => {
+            this.parentCandidates = res.filter(t => t.id !== this.task.id);
+            this.loadingParents = false;
+            this.cdr.markForCheck();
+        },
+        error: () => {
+            this.parentCandidates = [];
+            this.loadingParents = false;
+        }
     });
   }
 
-  getEmptyTask(): Task {
+  getEmptyTask(): TaskDTO {
     return {
       id: 0,
       nombre: '',
       descripcion: '',
       tipo: 'DESARROLLO',
       estado: 'PENDIENTE',
-      horasEstimadas: 0,
+      horas_estimadas: 0,
       fecha_ini: undefined,
       fecha_fin: undefined,
       observaciones: '',
-      subtareas: [],
-      padre: undefined,
-      proyecto: { id: 0, nombre: '', descripcion: '', estado: '', fecha_ini: new Date(), fecha_fin: new Date(), margen_beneficio: 0, totalTareas: 0, tareasCompletadas: 0 }
+      subtareas_ids: [],
+      tarea_padre: undefined,
+      id_proyecto: { id: 0, nombre: '', descripcion: '', estado: '', fecha_ini: new Date(), fecha_fin: new Date(), margen_beneficio: 0, totalTareas: 0, tareasCompletadas: 0 }
     };
   }
 
-  get filteredParentCandidates(): Task[] {
+  get filteredParentCandidates(): TaskListDTO[] {
     if (this.task && this.task.id) {
       return this.parentCandidates.filter(p => p.id !== this.task.id);
     }
@@ -198,7 +209,7 @@ export class MaintenanceTask implements OnInit {
       this.filterFechaFinHasta;
 
     const filterParams: TaskFilter = {
-      texto: this.searchTerm,
+      term: this.searchTerm,
       tipo: this.filterTipo ?? undefined,
       estado: this.filterEstado ?? undefined,
       proyecto: this.filterProyecto?.id ?? undefined,
@@ -239,27 +250,31 @@ export class MaintenanceTask implements OnInit {
     const filters: ActiveFilter[] = [];
 
     if (this.filterTipo) {
-      const label = this.tipos.find(t => t.value === this.filterTipo)?.label || this.filterTipo;
-      filters.push({ key: 'tipo', label: `Tipo: ${label}`, value: this.filterTipo });
+        const label = this.tipos.find(t => t.value === this.filterTipo)?.label || this.filterTipo;
+        filters.push({ key: 'tipo', label: `Tipo: ${label}`, value: this.filterTipo });
     }
+
     if (this.filterEstado) {
-      const label = this.estados.find(e => e.value === this.filterEstado)?.label || this.filterEstado;
-      filters.push({ key: 'estado', label: `Estado: ${label}`, value: this.filterEstado });
+        const label = this.estados.find(e => e.value === this.filterEstado)?.label || this.filterEstado;
+        filters.push({ key: 'estado', label: `Estado: ${label}`, value: this.filterEstado });
     }
+
     if (this.filterProyecto) {
-      filters.push({ key: 'proyecto', label: `Proyecto: ${this.filterProyecto.nombre}`, value: this.filterProyecto });
+        filters.push({ key: 'proyecto', label: `Proyecto: ${this.filterProyecto.nombre}`, value: this.filterProyecto });
     }
+
     if (this.filterPadre) {
-      filters.push({ key: 'padre', label: `Padre: ${this.filterPadre.nombre}`, value: this.filterPadre });
+        filters.push({ key: 'padre', label: `Padre: ${this.filterPadre.nombre}`, value: this.filterPadre });
     }
+
     if (this.filterFechaIniDesde) filters.push({ key: 'fIniD', label: `Ini > ${this.filterFechaIniDesde.toLocaleDateString()}`, value: this.filterFechaIniDesde });
     if (this.filterFechaIniHasta) filters.push({ key: 'fIniH', label: `Ini < ${this.filterFechaIniHasta.toLocaleDateString()}`, value: this.filterFechaIniHasta });
     if (this.filterFechaFinDesde) filters.push({ key: 'fFinD', label: `Fin > ${this.filterFechaFinDesde.toLocaleDateString()}`, value: this.filterFechaFinDesde });
     if (this.filterFechaFinHasta) filters.push({ key: 'fFinH', label: `Fin < ${this.filterFechaFinHasta.toLocaleDateString()}`, value: this.filterFechaFinHasta });
 
     this.activeFilters = filters;
-    this.dt.reset();
-  }
+    this.dt.reset(); 
+}
 
   clearFilters() {
     this.searchTerm = '';
@@ -272,6 +287,7 @@ export class MaintenanceTask implements OnInit {
     this.filterFechaFinDesde = null;
     this.filterFechaFinHasta = null;
     this.activeFilters = [];
+    this.filterParentTasks = [];
     this.dt.reset();
   }
 
@@ -281,23 +297,27 @@ export class MaintenanceTask implements OnInit {
   }
 
   openNew() {
-    this.loadParentCandidates();
     this.task = this.getEmptyTask();
+    this.parentCandidates = [];
     this.submitted = false;
     this.dialogTitle = 'Nueva Tarea';
     this.taskDialog = true;
-    this.cdr.markForCheck();
   }
 
-  editTask(t: Task) {
-    this.loadParentCandidates();
+  editTask(t: TaskDTO) {
     this.task = {
       ...t,
       fecha_ini: this.parseDate(t.fecha_ini),
       fecha_fin: this.parseDate(t.fecha_fin),
-      proyecto: t.proyecto,
-      padre: t.padre
+      id_proyecto: t.id_proyecto,
+      tarea_padre: t.tarea_padre
     };
+    if (this.task.id_proyecto && this.task.id_proyecto.id) {
+        this.loadParentsForProject(this.task.id_proyecto.id);
+    } else {
+        this.parentCandidates = [];
+    }
+
     this.dialogTitle = 'Editar Tarea';
     this.taskDialog = true;
     this.cdr.markForCheck();
@@ -306,15 +326,20 @@ export class MaintenanceTask implements OnInit {
   saveTask() {
     this.submitted = true;
 
-    if (!this.task.nombre.trim() || !this.task.proyecto?.id) {
+    if (!this.task.nombre.trim() || !this.task.id_proyecto?.id) {
       this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Completa los campos requeridos (Nombre y Proyecto).' });
       this.cdr.markForCheck();
       return;
     }
 
+    const taskToSave: Task = {
+      ...this.task,
+      proyecto: this.task.id_proyecto
+    };
+
     const request$ = this.task.id
-      ? this.taskService.updateTask(this.task)
-      : this.taskService.createTask(this.task);
+      ? this.taskService.updateTask(taskToSave)
+      : this.taskService.createTask(taskToSave);
 
     request$.subscribe({
       next: () => {
@@ -374,6 +399,38 @@ export class MaintenanceTask implements OnInit {
       case 'BLOQUEADA': return 'danger';
       case 'REVISION': return 'secondary';
       default: return 'contrast';
+    }
+  }
+
+  onProjectChange() {
+    this.task.tarea_padre = undefined;
+    
+    if (this.task.id_proyecto && this.task.id_proyecto.id) {
+        this.loadParentsForProject(this.task.id_proyecto.id);
+    } else {
+        this.parentCandidates = [];
+    }
+  }
+
+  onFilterProjectChange() {
+    this.filterPadre = null;
+    
+    if (this.filterProyecto && this.filterProyecto.id) {
+        this.loadingFilterParents = true;
+        this.taskService.getAllTaskNamesFromProject(this.filterProyecto.id).subscribe({
+            next: (res) => {
+                this.filterParentTasks = res;
+                this.loadingFilterParents = false;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.filterParentTasks = [];
+                this.loadingFilterParents = false;
+                this.cdr.markForCheck();
+            }
+        });
+    } else {
+        this.filterParentTasks = [];
     }
   }
 }

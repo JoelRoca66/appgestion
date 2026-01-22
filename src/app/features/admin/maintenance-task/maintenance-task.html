@@ -1,3 +1,5 @@
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>
 <div class="grid">
     <div class="col-12">
         <div class="card shadow-2 border-round p-4 surface-card">
@@ -5,24 +7,23 @@
                 <h1 class="m-0 text-900 font-bold">Gestión de Tareas</h1>
             </div>
 
-            <p-table #dt [value]="tasks" [lazy]="true" (onLazyLoad)="loadTasks($event)"
-                [totalRecords]="totalRecords" [loading]="loading" [rows]="10" [paginator]="true"
-                [rowsPerPageOptions]="[5, 10, 20]" [tableStyle]="{ 'min-width': '60rem' }"
-                styleClass="p-datatable-striped" dataKey="id">
+            <p-table #dt [value]="tasks" [lazy]="true" (onLazyLoad)="loadTasks($event)" [totalRecords]="totalRecords"
+                [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 20]"
+                [tableStyle]="{ 'min-width': '60rem' }" styleClass="p-datatable-striped" dataKey="id">
 
                 <ng-template pTemplate="caption">
                     <div class="flex flex-column md:flex-row md:align-items-center justify-content-between gap-3">
-                        
+
                         <div class="flex align-items-center gap-2 flex-wrap">
                             <p-button label="Filtros" icon="pi pi-filter" severity="secondary" outlined="true"
                                 (click)="op.toggle($event)"></p-button>
 
                             <div class="flex gap-2 flex-wrap">
                                 @for (filter of activeFilters; track filter.key) {
-                                    <p-chip [label]="filter.label" [removable]="false"
-                                        class="font-semibold text-sm surface-100 text-primary border-primary">
-                                        <i class="pi pi-filter mr-2 text-xs"></i>
-                                    </p-chip>
+                                <p-chip [label]="filter.label" [removable]="false"
+                                    class="font-semibold text-sm surface-100 text-primary border-primary">
+                                    <i class="pi pi-filter mr-2 text-xs"></i>
+                                </p-chip>
                                 }
                             </div>
                         </div>
@@ -48,35 +49,42 @@
                             <div class="field col-6">
                                 <label class="font-semibold block mb-2">Estado</label>
                                 <p-select [options]="estados" [(ngModel)]="filterEstado" placeholder="Todos"
-                                    [showClear]="true" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full">
+                                    [showClear]="true" optionLabel="label" optionValue="value" appendTo="body"
+                                    styleClass="w-full">
                                 </p-select>
                             </div>
                             <div class="field col-6">
                                 <label class="font-semibold block mb-2">Tipo</label>
                                 <p-select [options]="tipos" [(ngModel)]="filterTipo" placeholder="Todos"
-                                    [showClear]="true" optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full">
+                                    [showClear]="true" optionLabel="label" optionValue="value" appendTo="body"
+                                    styleClass="w-full">
                                 </p-select>
                             </div>
                         </div>
 
                         <div class="field">
                             <label class="font-semibold block mb-2">Proyecto</label>
-                            <p-select [options]="projects" [(ngModel)]="filterProyecto" placeholder="Seleccionar Proyecto"
-                                [showClear]="true" optionLabel="nombre" appendTo="body" styleClass="w-full" [filter]="true" filterBy="nombre">
+                            <p-select [options]="projects" [(ngModel)]="filterProyecto"
+                                (onChange)="onFilterProjectChange()" placeholder="Seleccionar Proyecto"
+                                [showClear]="true" optionLabel="nombre" appendTo="body" styleClass="w-full"
+                                [filter]="true" filterBy="nombre">
                             </p-select>
                         </div>
 
                         <div class="field">
                             <label class="font-semibold block mb-2">Tarea Padre (Filtrar Subtareas)</label>
-                            <p-select [options]="parentCandidates" [(ngModel)]="filterPadre" placeholder="Seleccionar Tarea Padre"
-                                [showClear]="true" optionLabel="nombre" appendTo="body" styleClass="w-full" 
-                                [filter]="true" filterBy="nombre" (onClick)="loadParentCandidates()">
+                            <p-select [options]="filterParentTasks" [(ngModel)]="filterPadre"
+                                [disabled]="!filterProyecto" [loading]="loadingFilterParents"
+                                [placeholder]="filterProyecto ? 'Seleccionar Tarea Padre' : 'Seleccione primero un proyecto'"
+                                [showClear]="true" optionLabel="nombre" appendTo="body" styleClass="w-full"
+                                [filter]="true" filterBy="nombre">
+
                                 <ng-template let-item pTemplate="item">
                                     <div class="flex flex-column">
                                         <span>{{item.nombre}}</span>
-                                        <small class="text-500" *ngIf="item.proyecto">Proj: {{item.proyecto.nombre}}</small>
                                     </div>
                                 </ng-template>
+
                             </p-select>
                         </div>
 
@@ -87,10 +95,14 @@
                                 <label class="block text-sm font-bold text-700 mb-2">Fecha de Inicio (Rango)</label>
                                 <div class="formgrid grid">
                                     <div class="col-6">
-                                        <p-datepicker [(ngModel)]="filterFechaIniDesde" placeholder="Desde" appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                                        <p-datepicker [(ngModel)]="filterFechaIniDesde" placeholder="Desde"
+                                            appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                            inputStyleClass="w-full"></p-datepicker>
                                     </div>
                                     <div class="col-6">
-                                        <p-datepicker [(ngModel)]="filterFechaIniHasta" placeholder="Hasta" appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                                        <p-datepicker [(ngModel)]="filterFechaIniHasta" placeholder="Hasta"
+                                            appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                            inputStyleClass="w-full"></p-datepicker>
                                     </div>
                                 </div>
                             </div>
@@ -99,10 +111,14 @@
                                 <label class="block text-sm font-bold text-700 mb-2">Fecha de Fin (Rango)</label>
                                 <div class="formgrid grid">
                                     <div class="col-6">
-                                        <p-datepicker [(ngModel)]="filterFechaFinDesde" placeholder="Desde" appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                                        <p-datepicker [(ngModel)]="filterFechaFinDesde" placeholder="Desde"
+                                            appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                            inputStyleClass="w-full"></p-datepicker>
                                     </div>
                                     <div class="col-6">
-                                        <p-datepicker [(ngModel)]="filterFechaFinHasta" placeholder="Hasta" appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                                        <p-datepicker [(ngModel)]="filterFechaFinHasta" placeholder="Hasta"
+                                            appendTo="body" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                                            inputStyleClass="w-full"></p-datepicker>
                                     </div>
                                 </div>
                             </div>
@@ -142,16 +158,18 @@
                         </td>
                         <td>{{ t.tipo }}</td>
                         <td><p-tag [value]="t.estado" [severity]="getSeverity(t.estado)"></p-tag></td>
-                        <td><span class="font-medium">{{ t.horasEstimadas }} h</span></td>
+                        <td><span class="font-medium">{{ t.horas_estimadas }} h</span></td>
                         <td>{{ t.fecha_ini | date: 'dd/MM/yyyy' }}</td>
                         <td>{{ t.fecha_fin | date: 'dd/MM/yyyy' }}</td>
                         <td class="text-center">
-                            <p-badge [value]="t.subtareas?.length || '0'" severity="secondary"></p-badge>
+                            <p-badge [value]="t.subtareas_ids?.length || '0'" severity="secondary"></p-badge>
                         </td>
                         <td class="text-center">
                             <div class="flex gap-2 justify-content-center">
-                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" (onClick)="editTask(t)"></p-button>
-                                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="deleteTask(t)"></p-button>
+                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info"
+                                    (onClick)="editTask(t)"></p-button>
+                                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                    (onClick)="deleteTask(t)"></p-button>
                             </div>
                         </td>
                     </tr>
@@ -166,40 +184,43 @@
 
     <ng-template pTemplate="content">
         <div class="flex flex-column gap-3 pt-1">
-            
+
             <div class="field mb-0">
                 <label for="proyecto" class="font-bold">Proyecto Asociado</label>
-                <p-select id="proyecto" [options]="projects" [(ngModel)]="task.proyecto" optionLabel="nombre"
-                        placeholder="Seleccionar Proyecto" appendTo="body" styleClass="w-full" [filter]="true" filterBy="nombre">
+                <p-select id="proyecto" [options]="projects" [(ngModel)]="task.id_proyecto"
+                    (onChange)="onProjectChange()" optionLabel="nombre" placeholder="Seleccionar Proyecto" dataKey="id"
+                    appendTo="body" styleClass="w-full" [filter]="true" filterBy="nombre">
                 </p-select>
-                <small class="p-error block mt-1" *ngIf="submitted && !task.proyecto.id">El proyecto es requerido.</small>
+                <small class="p-error block mt-1" *ngIf="submitted && !task.id_proyecto.id">
+                    El proyecto es requerido.
+                </small>
             </div>
 
             <div class="field mb-0">
                 <label for="padre" class="font-bold">Tarea Padre (Opcional)</label>
-                <p-select id="padre" [options]="filteredParentCandidates" [(ngModel)]="task.padre" optionLabel="nombre"
-                    placeholder="Sin padre (Tarea raíz)" [showClear]="true" appendTo="body" styleClass="w-full" 
-                    [filter]="true" filterBy="nombre">
-                    <ng-template let-p pTemplate="item">
-                        <div class="flex flex-column">
-                            <span class="font-bold">{{ p.nombre }}</span>
-                            <span class="text-sm text-500" *ngIf="p.proyecto">
-                                <i class="pi pi-folder text-xs"></i> {{ p.proyecto.nombre }}
-                            </span>
-                        </div>
+                <p-select id="padre" [options]="parentCandidates" [(ngModel)]="task.tarea_padre" optionLabel="nombre"
+                    [disabled]="!task.id_proyecto.id" [loading]="loadingParents"
+                    [placeholder]="task.id_proyecto.id ? 'Sin padre (Tarea raíz)' : 'Seleccione primero un proyecto'"
+                    [showClear]="true" dataKey="id" appendTo="body" styleClass="w-full" [filter]="true"
+                    filterBy="nombre">
+
+                    <ng-template let-item pTemplate="item">
+                        <span>{{ item.nombre }}</span>
                     </ng-template>
+
                 </p-select>
             </div>
 
             <div class="field mb-0">
                 <label for="nombre" class="font-bold">Nombre de la Tarea</label>
-                <input type="text" pInputText id="nombre" [(ngModel)]="task.nombre" required autofocus class="w-full"/>
+                <input type="text" pInputText id="nombre" [(ngModel)]="task.nombre" required autofocus class="w-full" />
                 <small class="p-error block mt-1" *ngIf="submitted && !task.nombre">El nombre es requerido.</small>
             </div>
 
             <div class="field mb-0">
                 <label for="descripcion" class="font-bold">Descripción</label>
-                <textarea id="descripcion" pTextarea [(ngModel)]="task.descripcion" rows="4" class="w-full" [autoResize]="false" style="resize: none;"></textarea>
+                <textarea id="descripcion" pTextarea [(ngModel)]="task.descripcion" rows="4" class="w-full"
+                    [autoResize]="false" style="resize: none;"></textarea>
             </div>
 
             <div class="formgrid grid">
@@ -219,7 +240,7 @@
 
             <div class="field mb-0">
                 <label for="horas" class="font-bold">Horas Estimadas</label>
-                <p-inputNumber id="horas" [(ngModel)]="task.horasEstimadas" [min]="0" [showButtons]="true"
+                <p-inputNumber id="horas" [(ngModel)]="task.horas_estimadas" [min]="0" [showButtons]="true"
                     buttonLayout="horizontal" inputStyleClass="text-center font-bold" styleClass="w-full"
                     decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
                     incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus">
@@ -235,20 +256,23 @@
                 <div class="field col-6 mb-0">
                     <label for="fecha_fin" class="font-bold">Fecha Fin</label>
                     <p-datepicker id="fecha_fin" [(ngModel)]="task.fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true"
-                        appendTo="body" placeholder="Opcional" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                        appendTo="body" placeholder="Opcional" styleClass="w-full"
+                        inputStyleClass="w-full"></p-datepicker>
                 </div>
             </div>
 
             <div class="field mb-0">
                 <label for="observaciones" class="font-bold">Observaciones</label>
-                <textarea id="observaciones" pTextarea [(ngModel)]="task.observaciones" rows="2" class="w-full"></textarea>
+                <textarea id="observaciones" pTextarea [(ngModel)]="task.observaciones" rows="2"
+                    class="w-full"></textarea>
             </div>
         </div>
     </ng-template>
 
     <ng-template pTemplate="footer">
         <div class="flex justify-content-end gap-2">
-            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+                (click)="hideDialog()"></button>
             <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" (click)="saveTask()"></button>
         </div>
     </ng-template>

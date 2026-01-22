@@ -10,3 +10,8 @@ export interface Project {
     totalTareas?: number;
     tareasCompletadas?: number;
 }
+
+export interface ProjectDTO {
+    id: number;
+    nombre: string;
+}

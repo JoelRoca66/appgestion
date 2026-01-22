@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Project } from '../models/project.model';
+import { Project, ProjectDTO } from '../models/project.model';
 import { ProjectFilter } from '../models/projectFilter.model';
 
 export interface PageResponse<T> {
@@ -49,5 +49,9 @@ export class ProjectService {
 
     findById(id: number): Observable<Project> {
         return this.http.get<Project>(`${this.apiUrl}/find/${id}`);
+    }
+
+    getAllProjectNames(): Observable<ProjectDTO[]> {
+        return this.http.get<ProjectDTO[]>(`${this.apiUrl}/all/nombres`);
     }
 }
