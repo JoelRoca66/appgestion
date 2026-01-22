@@ -57,7 +57,20 @@ export class TaskService {
     }
 
     updateTask(task: Task): Observable<Task> {
-        return this.http.put<Task>(`${this.apiUrl}/update`, task);
+        const aux = {
+            id: task.id,
+            nombre: task.nombre,
+            descripcion: task.descripcion,
+            tipo: task.tipo,
+            estado: task.estado,
+            observaciones: task.observaciones,
+            horas_estimadas: task.horas_estimadas,
+            fecha_ini: task.fecha_ini,
+            fecha_fin: task.fecha_fin,
+            tarea_padre: task.tarea_padre ? task.tarea_padre.id : null,
+            id_proyecto: task.proyecto.id
+        }
+        return this.http.put<Task>(`${this.apiUrl}/update`, aux);
     }
 
     deleteTask(id: number): Observable<void> {

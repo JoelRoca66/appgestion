@@ -1,7 +1,5 @@
 export interface RecordFilter {
-    fechaDesde?: Date;
-    fechaHasta?: Date;
-    usuarioId?: number;
-    tareaId?: number;
-    validado?: boolean;
+    fecha_desde?: Date;
+    fecha_hasta?: Date;
+    validado: boolean;
 }

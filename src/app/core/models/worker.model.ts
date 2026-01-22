@@ -9,3 +9,8 @@ export interface Worker {
 
     id_categoria: Category;
 }
+
+export interface WorkerNameDTO {
+    id: number;
+    dni: string;
+}

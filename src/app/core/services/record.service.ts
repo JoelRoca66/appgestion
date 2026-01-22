@@ -16,7 +16,7 @@ export interface PageResponse<T> {
 @Injectable({ providedIn: 'root'})
 export class RecordService {
     private http = inject(HttpClient)
-    private apiUrl = 'http://localhost:8080/record';
+    private apiUrl = 'http://localhost:8080/jornada';
 
     getRecords(page: number, size: number): Observable<PageResponse<Record>> {
         return this.http.get<PageResponse<Record>>(`${this.apiUrl}/all`, { params: { page, size } });
@@ -24,11 +24,9 @@ export class RecordService {
 
     searchRecord(filter: RecordFilter, page: number, size: number): Observable<PageResponse<Record>> {
         const params = new HttpParams()
-            .set('fechaDesde', filter.fechaDesde ? filter.fechaDesde.toISOString() : '')
-            .set('fechaHasta', filter.fechaHasta ? filter.fechaHasta.toISOString() : '')
-            .set('usuarioId', filter.usuarioId ? filter.usuarioId.toString() : '')
-            .set('tareaId', filter.tareaId ? filter.tareaId.toString() : '')
-            .set('validado', filter.validado !== undefined ? filter.validado.toString() : '')
+            .set('fecha_desde', filter.fecha_desde ? filter.fecha_desde.toLocaleDateString('sv') : '')
+            .set('fecha_hasta', filter.fecha_hasta ? filter.fecha_hasta.toLocaleDateString('sv') : '')
+            .set('validado', filter.validado )
             .set('page', page.toString())
             .set('size', size.toString());
         return this.http.get<PageResponse<any>>(
@@ -38,11 +36,19 @@ export class RecordService {
     }
 
     createRecord(record: Record): Observable<Record> {
-        return this.http.post<Record>(`${this.apiUrl}/create`, record);
+        return this.http.post<Record>(`${this.apiUrl}/add`, record);
     }
 
     updateRecord(record: Record): Observable<Record> {
-        return this.http.put<Record>(`${this.apiUrl}/update/${record.id}`, record);
+        const aux = { 
+            id: record.id,
+            fecha: record.fecha.toLocaleDateString('sv'),
+            horas: record.horas,
+            validado: record.validado,
+            id_tarea: record.id_tarea.id,
+            id_trabajador: record.id_trabajador.id
+        }
+        return this.http.put<Record>(`${this.apiUrl}/update`, aux);
     }
 
     deleteRecord(id: number): Observable<void> {
