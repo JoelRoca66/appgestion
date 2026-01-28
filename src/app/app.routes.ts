@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
-import { MainLayout } from './layout/main-layout/main-layout';
 import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
 import { Maintenance } from './features/admin/maintenance/maintenance';
 import { MaintenanceCategory } from './features/admin/maintenance-category/maintenance-category';
@@ -10,37 +9,57 @@ import { MaintenanceRecord } from './features/admin/maintenance-record/maintenan
 import { MaintenanceTask } from './features/admin/maintenance-task/maintenance-task';
 import { MaintenanceUser } from './features/admin/maintenance-user/maintenance-user';
 import { MaintenanceMaterial } from './features/admin/maintenance-material/maintenance-material';
-import { adminGuard, authGuard } from './guards/auth.guard';
+import { AdminConfig } from './features/admin/admin-config/admin-config';
+
+import { authGuard, adminGuard, guestGuard } from './guards/auth.guard';
+import { MainLayout } from './layout/admin/main-layout/main-layout';
+import { UserHomeComponent } from './features/user/home/home';
+import { MainLayoutUser } from './layout/user/main-layout/main-layout';
+import { JornadaNoValidada } from './features/admin/JornadaNoValidada/JornadaNoValidada';
+import { ProyectosComponent } from './features/user/proyectos.component/proyectos.component';
+import { ProyectosDetallesComponent } from './features/user/proyectos-detalles.component/proyectos-detalles.component';
 
 export const routes: Routes = [
-    {
-        path: 'login',
-        component: Login
-    },
-    {
-        path: '',
-        component: MainLayout,
-        children: [
-            // { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] },
-            // { path: 'mantenimiento', component: Maintenance, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/categorias', component: MaintenanceCategory, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/trabajadores', component: MaintenanceWorker, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/proyectos', component: MaintenanceProject, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/registros', component: MaintenanceRecord, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/tareas', component: MaintenanceTask, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/usuarios', component: MaintenanceUser, canActivate: [adminGuard] },
-            // { path: 'mantenimiento/materiales', component: MaintenanceMaterial, canActivate: [adminGuard] }
-            { path: 'admin/dashboard', component: AdminDashboard },
-            { path: 'admin/mantenimiento', component: Maintenance },
-            { path: 'admin/mantenimiento/categorias', component: MaintenanceCategory },
-            { path: 'admin/mantenimiento/trabajadores', component: MaintenanceWorker },
-            { path: 'admin/mantenimiento/proyectos', component: MaintenanceProject },
-            { path: 'admin/mantenimiento/registros', component: MaintenanceRecord },
-            { path: 'admin/mantenimiento/tareas', component: MaintenanceTask },
-            { path: 'admin/mantenimiento/usuarios', component: MaintenanceUser },
-            { path: 'admin/mantenimiento/materiales', component: MaintenanceMaterial }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 
+{
+  path: 'login',
+  component: Login,
+  canActivate: [guestGuard]
+},
+
+  {
+    path: 'admin',
+    component: MainLayout,
+    canActivate: [authGuard, adminGuard],
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: AdminDashboard },
+      { path: 'mantenimiento', component: Maintenance },
+      { path: 'mantenimiento/categorias', component: MaintenanceCategory },
+      { path: 'mantenimiento/trabajadores', component: MaintenanceWorker },
+      { path: 'mantenimiento/proyectos', component: MaintenanceProject },
+      { path: 'mantenimiento/registros', component: MaintenanceRecord },
+      { path: 'mantenimiento/tareas', component: MaintenanceTask },
+      { path: 'mantenimiento/usuarios', component: MaintenanceUser },
+      { path: 'mantenimiento/materiales', component: MaintenanceMaterial },
+      { path: 'jornadas/no-validadas', component: JornadaNoValidada },
+      { path: 'config', component: AdminConfig }
+    ]
+  },
+
+  {
+    path: 'user',
+    component: MainLayoutUser,
+    canActivate: [authGuard],
+    //canActivateChild: [authGuard],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: UserHomeComponent },
+      { path: 'proyectos', component: ProyectosComponent },
+      { path: 'proyectos/:id', component: ProyectosDetallesComponent },
         ]
-    },
-    { path: '**', redirectTo: 'login' }
+  },
+
+  { path: '**', redirectTo: '/login' }
 ];

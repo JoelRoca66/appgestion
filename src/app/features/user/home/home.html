@@ -1,0 +1,51 @@
+<p-toast></p-toast>
+
+<div class="main-content-grid">
+  <div class="left-column">
+
+    <p-card header="Mis Tareas" styleClass="tasks-card">
+      <div class="tasks-list">
+
+        @for (tarea of misTareas; track tarea.id) {
+        <hr class="task-divider">
+
+        <div class="task-item">
+          <div class="task-header">
+
+            <div class="task-title-section">
+              <h3>{{ tarea.titulo }}</h3>
+              <p class="task-project">Proyecto: {{ tarea.proyecto }}</p>
+            </div>
+
+            <p-tag [value]="tarea.estado" class="mb-2"></p-tag>
+          </div>
+
+          <div class="task-progress">
+            <div class="progress-info mb-1">
+              <span>Progreso </span>
+              <span>{{ tarea.progreso }}%</span>
+            </div>
+
+            <p-progressBar [value]="tarea.progreso" [showValue]="false">
+            </p-progressBar>
+          </div>
+
+          <div class="task-footer">
+            <span class="task-date" *ngIf="tarea.fecha_limite">
+              <i class="pi pi-calendar"></i>
+              {{ tarea.fecha_limite | date:'dd/MM/yyyy' }}
+            </span>
+
+            <p-button label="Ver detalle" icon="pi pi-eye" styleClass="p-button-text p-button-sm"
+              (click)="verDetalleTarea(tarea)">
+            </p-button>
+          </div>
+        </div>
+        }
+
+
+      </div>
+    </p-card>
+
+  </div>
+</div>

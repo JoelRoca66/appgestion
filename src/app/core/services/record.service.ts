@@ -58,4 +58,10 @@ export class RecordService {
     findById(id: number): Observable<Record> {
         return this.http.get<Record>(`${this.apiUrl}/find/${id}`);
     }
+    countNoValidadas(): Observable<number>{
+        return this.http.get<number>(`${this.apiUrl}/count/no_validadas`);
+    }
+    getNoValdidas(page: number, size: number): Observable<PageResponse<Record>> {
+        return this.http.get<PageResponse<Record>>(`${this.apiUrl}/all/no_validadas`, { params: { page, size } });
+    }
 }

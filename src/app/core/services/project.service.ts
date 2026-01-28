@@ -3,6 +3,9 @@ import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Project, ProjectDTO } from '../models/project.model';
 import { ProjectFilter } from '../models/projectFilter.model';
+import { formatDateLocal } from '../../features/utilidades/date-utils';
+import { ProyectoTareasDTO } from '../models/project.model';
+
 
 export interface PageResponse<T> {
     content: T[];
@@ -23,17 +26,20 @@ export class ProjectService {
 
     searchProject(filter: ProjectFilter, page: number, size: number): Observable<PageResponse<Project>> {
         const params = new HttpParams()
-            .set('texto', filter.texto)
-            .set('estado', filter.estado ? filter.estado : '')
-            .set('margenBeneficioMin', filter.margen_beneficio_min ? filter.margen_beneficio_min.toString().split('T')[0] : '')
-            .set('fechaInicioDesde', filter.fecha_inicio_desde ? filter.fecha_inicio_desde.toISOString().split('T')[0] : '')
-            .set('fechaInicioHasta', filter.fecha_inicio_hasta ? filter.fecha_inicio_hasta.toISOString().split('T')[0] : '')
-            .set('fechaFinDesde', filter.fecha_fin_desde ? filter.fecha_fin_desde.toISOString().split('T')[0] : '')
-            .set('fechaFinHasta', filter.fecha_fin_hasta ? filter.fecha_fin_hasta.toISOString().split('T')[0] : '')
+            .set('texto', filter.texto ?? '')
+            .set('estado', filter.estado ?? '')
+            .set('margenBeneficioMin', filter.margen_beneficio_min?.toString() ?? '')
+            .set('fecha_ini_desde', formatDateLocal(filter.fecha_inicio_desde))
+            .set('fecha_ini_hasta', formatDateLocal(filter.fecha_inicio_hasta))
+            .set('fecha_fin_desde', formatDateLocal(filter.fecha_fin_desde))
+            .set('fecha_fin_hasta', formatDateLocal(filter.fecha_fin_hasta))
             .set('page', page.toString())
             .set('size', size.toString());
+
         return this.http.get<PageResponse<any>>(`${this.apiUrl}/search`, { params });
     }
+
+
 
     createProject(project: Project): Observable<Project> {
         return this.http.post<Project>(`${this.apiUrl}/add`, project);
@@ -47,9 +53,11 @@ export class ProjectService {
         return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
     }
 
-    findById(id: number): Observable<Project> {
-        return this.http.get<Project>(`${this.apiUrl}/find/${id}`);
+
+    findById(id: number): Observable<ProyectoTareasDTO> {
+        return this.http.get<ProyectoTareasDTO>(`${this.apiUrl}/find/${id}`);
     }
+
 
     getAllProjectNames(): Observable<ProjectDTO[]> {
         return this.http.get<ProjectDTO[]>(`${this.apiUrl}/all/nombres`);

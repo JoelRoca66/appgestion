@@ -1,0 +1,174 @@
+<p-toast></p-toast>
+
+<div class="grid">
+    <div class="col-12">
+        <p-card class="shadow-2 border-round surface-card">
+
+            <ng-template pTemplate="header">
+                <div class="flex align-items-center justify-content-between w-full">
+                    <div class="flex align-items-center gap-2">
+                        <span class="text-xl font-bold">Perfil de Usuario</span>
+                        <p-tag [value]="session()?.rol ? 'Administrador' : 'Usuario'"></p-tag>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <p-button label="Editar" icon="pi pi-user-edit" [text]="true" (click)="openEdit()"></p-button>
+                        <p-button label="Cambiar contraseña" icon="pi pi-key" [text]="true"
+                            (click)="openPasswordDialog()"></p-button>
+                    </div>
+                </div>
+            </ng-template>
+
+            @if (loading()) {
+
+            <div class="flex flex-column gap-3">
+                <p-skeleton height="1.5rem" width="40%"></p-skeleton>
+                <p-skeleton height="1rem" width="60%"></p-skeleton>
+                <p-skeleton height="1rem" width="30%"></p-skeleton>
+                <p-skeleton height="1rem" width="50%"></p-skeleton>
+            </div>
+
+            } @else if (error()) {
+
+            <p class="p-error font-semibold">{{ error() }}</p>
+
+            } @else {
+
+            <div class="flex flex-column gap-3">
+
+                <div class="flex align-items-center gap-2">
+                    <p-chip label="Usuario: {{ session()?.usuario }}" icon="pi pi-user"></p-chip>
+                    <p-chip label="Cambio contraseña: {{ session()?.cambio_contrasena ? 'Sí' : 'No' }}"
+                        icon="pi pi-key"></p-chip>
+                </div>
+
+                <p-divider></p-divider>
+
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <label class="font-bold block mb-1">Nombre completo</label>
+                        <div>{{ worker()?.nombre }} {{ worker()?.apellido }}</div>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold block mb-1">DNI</label>
+                        <div>{{ worker()?.dni }}</div>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold block mb-1">Estado</label>
+                        <p-tag [value]="worker()?.estado"
+                            [severity]="(worker()?.estado ?? '').toLowerCase() === 'activo' ? 'success' : 'danger'">
+                        </p-tag>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <label class="font-bold block mb-1">Categoría</label>
+                        <div>{{ worker()?.id_categoria?.nombre }}</div>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold block mb-1">Precio Trabajador</label>
+                        <div>{{ worker()?.id_categoria?.precio_hora_trabajador }} €/h</div>
+                    </div>
+
+                    <div class="col-12 md:col-3">
+                        <label class="font-bold block mb-1">Precio Coste</label>
+                        <div>{{ worker()?.id_categoria?.precio_hora_coste }} €/h</div>
+                    </div>
+                </div>
+
+            </div>
+            }
+
+        </p-card>
+    </div>
+</div>
+
+@if (editDialogVisible()) {
+
+<p-dialog header="Editar datos" [visible]="true" (onHide)="editDialogVisible.set(false)" [modal]="true"
+    [draggable]="false" [resizable]="false" [style]="{width:'450px'}" styleClass="p-fluid">
+
+    <ng-template pTemplate="content">
+
+        @if (editForm) {
+        <form [formGroup]="editForm">
+            <div class="field mb-3">
+                <label class="font-bold block mb-1">Nombre</label>
+                <input type="text" pInputText formControlName="nombre" class="w-full">
+                @if (editForm.controls['nombre'].invalid && editForm.controls['nombre'].touched) {
+                <small class="p-error">Nombre requerido</small>
+                }
+            </div>
+
+            <div class="field mb-3">
+                <label class="font-bold block mb-1">Apellido</label>
+                <input type="text" pInputText formControlName="apellido" class="w-full">
+            </div>
+
+            <div class="field mb-3">
+                <label class="font-bold block mb-1">DNI</label>
+                <input type="text" pInputText formControlName="dni" placeholder="12345678Z" class="w-full">
+                @if (editForm.controls['dni'].invalid && editForm.controls['dni'].touched) {
+                <small class="p-error">Formato DNI inválido</small>
+                }
+            </div>
+        </form>
+        }
+
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" (click)="editDialogVisible.set(false)">
+        </p-button>
+
+        <p-button label="Guardar" icon="pi pi-check" (click)="saveEdit()" [disabled]="!editForm || editForm.invalid">
+        </p-button>
+    </ng-template>
+
+</p-dialog>
+
+}
+@if (passwordDialogVisible()) {
+
+<p-dialog header="Cambiar contraseña" [visible]="true" (onHide)="passwordDialogVisible.set(false)" [modal]="true"
+    [draggable]="false" [resizable]="false" [style]="{width:'450px'}" styleClass="p-fluid">
+
+    <ng-template pTemplate="content">
+
+        @if (passwordForm) {
+        <form [formGroup]="passwordForm">
+
+            <div class="field mb-3">
+                <label class="font-bold block mb-1">Nueva contraseña</label>
+                <input type="password" pInputText formControlName="nueva" class="w-full">
+            </div>
+
+            <div class="field mb-3">
+                <label class="font-bold block mb-1">Repetir contraseña</label>
+                <input type="password" pInputText formControlName="repetir" class="w-full">
+            </div>
+
+            @if (passwordForm.hasError('passwordsMismatch')) {
+            <small class="p-error">Las contraseñas no coinciden</small>
+            }
+
+        </form>
+        }
+
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true"
+            (click)="passwordDialogVisible.set(false)"></p-button>
+
+        <p-button label="Guardar" icon="pi pi-check" (click)="savePassword()"
+            [disabled]="!passwordForm || passwordForm.invalid"></p-button>
+    </ng-template>
+
+</p-dialog>
+
+}

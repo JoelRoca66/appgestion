@@ -3,6 +3,7 @@ import { Worker } from '../models/worker.model';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { WorkerFilter } from '../models/workerFilter.model';
+import { TareaJornadaDTO } from '../models/task.model';
 
 export interface PageResponse<T> {
     content: T[];
@@ -23,9 +24,9 @@ export class WorkerService {
 
     searchWorker(filtro: WorkerFilter, page: number, size: number): Observable<PageResponse<Worker>> {
         const params = new HttpParams()
-            .set('texto', filtro.term)
+            .set('texto', filtro.texto)
             .set('estado', filtro.estado ? filtro.estado : '')
-            .set('categoriaId', filtro.categoriaId ? filtro.categoriaId : 0)
+            .set('id_categoria', filtro.id_categoria ? filtro.id_categoria : 0)
             .set('page', page.toString())
             .set('size', size.toString());
 
@@ -66,4 +67,20 @@ export class WorkerService {
     findById(id: number): Observable<Worker> {
         return this.http.get<Worker>(`${this.apiUrl}/find/${id}`);
     }
+    getTareasTrabajador(
+        trabajadorId: number, 
+        page: number = 0, 
+        size: number = 10
+    ): Observable<PageResponse<TareaJornadaDTO>> {
+        const params = new HttpParams()
+            .set('page', page.toString())
+            .set('size', size.toString());
+
+        return this.http.get<PageResponse<TareaJornadaDTO>>(
+            `${this.apiUrl}/${trabajadorId}/tareas`,
+            { params }
+        );
+    }
 }
+
+

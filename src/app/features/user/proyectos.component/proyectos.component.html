@@ -1,0 +1,91 @@
+<div class="card">
+    <div class="flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+
+        <div class="flex gap-2 align-items-center flex-wrap">
+            <p-button label="Filtros" icon="pi pi-filter" severity="secondary" (click)="op.toggle($event)"></p-button>
+            <p-popover #op [style]="{width: '400px'}">
+                <div class="flex flex-column gap-3 p-3 p-fluid">
+                    <div class="field mb-0">
+                        <label class="font-bold block mb-2">Estado</label>
+                        <p-select [options]="estados" [(ngModel)]="filterEstado" placeholder="Todos" [showClear]="true"
+                            optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full">
+                        </p-select>
+                    </div>
+
+                    <div class="formgrid grid">
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold block mb-2 text-sm">Inicio (Desde)</label>
+                            <p-datepicker [(ngModel)]="filterFechaIniDesde" appendTo="body" dateFormat="dd/mm/yy"
+                                [showIcon]="true" styleClass="w-full" [inputStyle]="{'width':'100%'}">
+                            </p-datepicker>
+                        </div>
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold block mb-2 text-sm">Inicio (Hasta)</label>
+                            <p-datepicker [(ngModel)]="filterFechaIniHasta" appendTo="body" dateFormat="dd/mm/yy"
+                                [showIcon]="true" styleClass="w-full" [inputStyle]="{'width':'100%'}">
+                            </p-datepicker>
+                        </div>
+                    </div>
+
+                    <div class="formgrid grid mt-2">
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold block mb-2 text-sm">Fin (Desde)</label>
+                            <p-datepicker [(ngModel)]="filterFechaFinDesde" appendTo="body" dateFormat="dd/mm/yy"
+                                [showIcon]="true" styleClass="w-full" [inputStyle]="{'width':'100%'}">
+                            </p-datepicker>
+                        </div>
+                        <div class="field col-6 mb-0">
+                            <label class="font-bold block mb-2 text-sm">Fin (Hasta)</label>
+                            <p-datepicker [(ngModel)]="filterFechaFinHasta" appendTo="body" dateFormat="dd/mm/yy"
+                                [showIcon]="true" styleClass="w-full" [inputStyle]="{'width':'100%'}">
+                            </p-datepicker>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-content-end gap-2 mt-2 pt-2 border-top-1 surface-border">
+                        <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true"
+                            (click)="clearFilters(); op.hide()"></p-button>
+                        <p-button label="Aplicar" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
+                    </div>
+                </div>
+            </p-popover>
+
+            <p-chip *ngFor="let filter of activeFilters" [label]="filter.label" [removable]="false"
+                class="ml-2 border-primary text-primary surface-overlay text-sm font-bold">
+                <i class="pi pi-filter mr-2 text-xs"></i>
+            </p-chip>
+        </div>
+
+        <span class="p-input-icon-left" style="position: relative; display: block; width: 250px;">
+            <i class="pi pi-search"
+                style="position: absolute; top:50%; left:1rem; transform: translateY(-50%); color: var(--text-color-secondary);"></i>
+            <input pInputText type="text" (input)="onSearch($event)" placeholder="Buscar por nombre..."
+                style="padding-left: 3rem; width:100%;" />
+        </span>
+    </div>
+
+    <p-table #dt [value]="projects" [lazy]="true" (onLazyLoad)="loadProjects($event)" [totalRecords]="totalRecords"
+        [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5,10,20]">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-p>
+            <tr>
+                <td>
+                    <span (click)="goToProjectDetail(p.id)" class="cursor-pointer text-primary">
+                        {{ p.nombre }}
+                    </span>
+                </td>
+                <td><p-tag [value]="p.estado" [severity]="getSeverity(p.estado)"></p-tag></td>
+                <td>{{p.fecha_ini | date:'dd/MM/yyyy'}}</td>
+                <td>{{p.fecha_fin | date:'dd/MM/yyyy'}}</td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>

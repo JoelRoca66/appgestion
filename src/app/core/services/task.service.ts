@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Task, TaskDTO, TaskListDTO } from '../models/task.model';
 import { TaskFilter } from '../models/taskFilter.model';
 import { create } from 'domain';
+import { TareaLazyDTO } from '../models/project.model';
 
 export interface PageResponse<T> {
     content: T[];
@@ -77,9 +78,10 @@ export class TaskService {
         return this.http.delete<void>(`${this.apiUrl}/delete/${id}`);
     }
 
-    findById(id: number): Observable<Task> {
-        return this.http.get<Task>(`${this.apiUrl}/find/${id}`);
+    findById(id: number): Observable<TareaLazyDTO> {
+        return this.http.get<TareaLazyDTO>(`${this.apiUrl}/find/${id}`);
     }
+
 
     getAllTaskNamesFromProject(id: number): Observable<TaskListDTO[]> {
         return this.http.get<TaskListDTO[]>(`${this.apiUrl}/all/nombres`, { params: { id } });

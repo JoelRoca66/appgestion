@@ -16,7 +16,7 @@ export class Sidebar implements OnInit {
     this.items = [
       { label: 'Dashboard', icon: 'pi pi-home', routerLink: ['/admin/dashboard'] },
       { label: 'Mantenimiento', icon: 'pi pi-wrench', routerLink: ['/admin/mantenimiento'] },
-      { label: 'Configuración', icon: 'pi pi-cog', routerLink: ['/settings'] }
+      { label: 'Configuración', icon: 'pi pi-cog', routerLink: ['/admin/config'] }
     ]
   }
 }

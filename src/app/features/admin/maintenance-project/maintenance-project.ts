@@ -125,24 +125,23 @@ export class MaintenanceProject implements OnInit {
 
     let date: Date;
 
-    // 1. Intentar parsear según el tipo de dato
+ 
     if (Array.isArray(dateValue)) {
-      // Manejo de arrays [Year, Month, Day, Hour?, Minute?, Second?]
+   
       date = new Date(
         dateValue[0],
-        (dateValue[1] || 1) - 1, // Mes (si viene null usa enero)
-        dateValue[2] || 1,       // Día (si viene null usa 1)
+        (dateValue[1] || 1) - 1, 
+        dateValue[2] || 1,       
         dateValue[3] || 0,
         dateValue[4] || 0,
         dateValue[5] || 0
       );
     } else {
-      // Manejo de strings ISO o timestamps
+ 
       date = new Date(dateValue);
     }
 
-    // 2. Comprobación FINAL: ¿Es una fecha válida?
-    // Si date.getTime() es NaN, es una fecha inválida.
+
     return isNaN(date.getTime()) ? undefined : date;
   }
 
@@ -192,7 +191,6 @@ export class MaintenanceProject implements OnInit {
         next: response => {
           this.projects = response.content.map(p => ({
             ...p,
-            // Si parseDate falla, usa null (o new Date() si prefieres que nunca esté vacío)
             fechaIni: this.parseDate(p.fecha_ini) || undefined,
             fechaFin: this.parseDate(p.fecha_fin) || undefined
           } as Project));

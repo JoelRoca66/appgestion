@@ -8,13 +8,13 @@ export class AuthService {
     private http = inject(HttpClient);
     private apiUrl = 'http://localhost:8080/auth';
 
-    login(username: string, password: string): Observable<User> {
-        return this.http.post<any>(`${this.apiUrl}/login`, { username, password });
+    login(usuario: string, contrasena: string): Observable<User> {
+        return this.http.post<any>(`${this.apiUrl}/login`, { usuario, contrasena });
     }
     
     updatePassword(user: User): Observable<User> {
         const aux = {
-            id: user.id_trabajador,
+            id_usuario: user.id_trabajador,
             nueva_contrasena: user.contrasena
         }
         return this.http.post<any>(`${this.apiUrl}/update-password`, aux)

@@ -3,5 +3,10 @@
         "activityBar.background": "#3C2058",
         "titleBar.activeBackground": "#532C7C",
         "titleBar.activeForeground": "#FBFAFD"
+    },
+    "angular-schematics.schematicsDefaultOptions": {
+        "angular-*": {
+            "externalTemplate": true
+        }
     }
 }

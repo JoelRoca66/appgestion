@@ -1,5 +1,5 @@
 export interface WorkerFilter {
-    term: string;
-    estado?: string;
-    categoriaId?: number;
+  texto: string;
+  estado: string | null;
+  id_categoria: number | null;
 }

@@ -4,7 +4,7 @@ import { Topbar } from '../topbar/topbar';
 import { Sidebar } from '../sidebar/sidebar';
 
 @Component({
-  selector: 'app-main-layout',
+  selector: 'app-main-layout-admin',
   imports: [RouterOutlet, Topbar, Sidebar],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css',
