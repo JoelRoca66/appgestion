@@ -1,6 +1,6 @@
 import { Project } from "./project.model";
 
-export type TaskState = 'PENDIENTE' | 'EN_PROCESO' | 'BLOQUEADA' | 'REVISION' | 'COMPLETADA';
+export type TaskState = 'FINALIZADO' | 'PENDIENTE' | 'EN_PROCESO' | 'BLOQUEADA' | 'REVISION' | 'COMPLETADA';
 
 export interface TaskLite {
     id: number;

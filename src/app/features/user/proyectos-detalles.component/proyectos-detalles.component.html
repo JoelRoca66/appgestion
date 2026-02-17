@@ -50,7 +50,7 @@
     </p-card>
   </div>
 
-  <!-- Card de Tareas -->
+  <!-- Card de Tareas (Tree) -->
   <div class="col-12">
     <p-card styleClass="shadow-2">
       <ng-template pTemplate="header">
@@ -65,7 +65,6 @@
       <p-tree [value]="taskTree" selectionMode="single" (onNodeExpand)="onNodeExpand($event)"
         class="w-full custom-tree">
         <ng-template let-node pTemplate="default">
-          <!-- Nodo de tarea real (con data) -->
           <div *ngIf="node?.data" class="flex align-items-center justify-content-between w-full py-2">
             <div class="flex align-items-center flex-1">
               <i [class]="'pi pi-' + getTareaIcon(node.data.tipo) + ' mr-2 ' + getTareaIconColor(node.data.tipo)"></i>
@@ -80,15 +79,11 @@
               </span>
             </div>
           </div>
-
-          <!-- Nodo de carga (sin data, con clase loading-node) -->
           <div *ngIf="!node?.data && node.styleClass?.includes('loading-node')"
             class="flex align-items-center w-full py-2">
             <i class="pi pi-spin pi-spinner mr-2 text-color-secondary"></i>
             <span class="text-color-secondary">{{ node.label }}</span>
           </div>
-
-          <!-- Nodo de error (sin data, con clase error-node) -->
           <div *ngIf="!node?.data && node.styleClass?.includes('error-node')"
             class="flex align-items-center w-full py-2">
             <i class="pi pi-exclamation-triangle mr-2 text-red-500"></i>
@@ -99,4 +94,52 @@
     </p-card>
   </div>
 
+ <!-- ===== KANBAN ===== -->
+<div class="col-12">
+  <p-card styleClass="shadow-2">
+    <ng-template pTemplate="header">
+      <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
+        <h3 class="m-0 text-primary flex align-items-center">
+          <i class="pi pi-tablet mr-2"></i>
+          Tablero Kanban
+        </h3>
+        <span class="text-sm text-600">{{ getTotalTareasKanban() }} tarea(s)</span>
+      </div>
+    </ng-template>
+
+    <div class="kanban-board">
+      <div *ngFor="let col of kanbanColumns" class="kanban-col">
+
+        <div class="kanban-col-header" [ngClass]="col.headerClass">
+          <span class="kanban-col-title">{{ col.label }}</span>
+          <p-badge [value]="col.tareas().length.toString()" severity="secondary"></p-badge>
+        </div>
+
+        <div
+          class="kanban-drop-zone"
+          cdkDropList
+          [id]="col.key"
+          [cdkDropListData]="col.tareas()"
+          [cdkDropListConnectedTo]="kanbanColumnIds"
+          (cdkDropListDropped)="onKanbanDrop($event, col)">
+
+          <div
+            *ngFor="let tarea of col.tareas()"
+            class="kanban-card"
+            cdkDrag
+            [cdkDragData]="tarea">
+            <div *cdkDragPlaceholder class="kanban-card-placeholder"></div>
+            <span class="kanban-card-title">{{ tarea.nombre }}</span>
+          </div>
+
+          <div *ngIf="col.tareas().length === 0" class="kanban-empty">
+            <i class="pi pi-inbox"></i>
+            <span>Sin tareas</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </p-card>
 </div>

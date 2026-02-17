@@ -19,6 +19,7 @@ import { ProyectosComponent } from './features/user/proyectos.component/proyecto
 import { ProyectosDetallesComponent } from './features/user/proyectos-detalles.component/proyectos-detalles.component';
 import { TareasComponent } from './features/user/tareas.component/tareas.component';
 import { TareasDetallesComponent } from './features/user/tareas-detalles.component/tareas-detalles.component';
+import { KanbanComponent } from './features/user/kanban/kanban';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -60,7 +61,8 @@ export const routes: Routes = [
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:id', component: ProyectosDetallesComponent },
       { path: 'tareas', component: TareasComponent },
-      { path: 'tareas/:id', component: TareasDetallesComponent }
+      { path: 'tareas/:id', component: TareasDetallesComponent },
+      { path: 'kanban', component: KanbanComponent },
         ]
   },
 

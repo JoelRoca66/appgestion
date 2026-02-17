@@ -135,12 +135,7 @@
         <ng-template pTemplate="body" let-t>
           <tr>
             <td>
-              <div class="flex flex-column">
-                <span (click)="goToTaskDetail(t.id)" class="font-bold text-900">{{ t.nombre }}</span>
-                <span class="text-500 text-sm" *ngIf="t.proyecto">
-                  <i class="pi pi-folder mr-1 text-xs"></i>{{ t.proyecto.nombre }}
-                </span>
-              </div>
+                <span (click)="goToTaskDetail(t.id)" class="cursor-pointer text-primary">{{ t.nombre }}</span>
             </td>
             <td>{{ t.tipo }}</td>
             <td><p-tag [value]="t.estado" [severity]="getSeverity(t.estado)"></p-tag></td>
