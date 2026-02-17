@@ -1,0 +1,23 @@
+<p-toolbar>
+  <div class="p-toolbar-group-start">
+    <h2 class="m-0 text-primary font-bold">App Gestión</h2>
+  </div>
+
+  <div class="p-toolbar-group-end gap-2">
+
+    @if (admin) {
+      <div style="position: relative; display: inline-block;">
+        <p-button icon="pi pi-verified" [text]="true" [rounded]="true" pTooltip="Verificar Registros"
+          tooltipPosition="bottom" (click)="irAValidaciones()">
+        </p-button>
+
+        <span class="custom-badge">{{ noValidadasCount }}</span>
+      </div>
+    }
+
+    <p-button icon="pi pi-sign-out" [text]="true" [rounded]="true" severity="danger" pTooltip="Cerrar Sesión"
+      tooltipPosition="bottom" (click)="logout()">
+    </p-button>
+
+  </div>
+</p-toolbar>

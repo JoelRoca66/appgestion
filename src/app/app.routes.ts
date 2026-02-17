@@ -12,13 +12,13 @@ import { MaintenanceMaterial } from './features/admin/maintenance-material/maint
 import { AdminConfig } from './features/admin/admin-config/admin-config';
 
 import { authGuard, adminGuard, guestGuard } from './guards/auth.guard';
-import { MainLayout } from './layout/admin/main-layout/main-layout';
+import { MainLayout } from './layout/main-layout/main-layout';
 import { UserHomeComponent } from './features/user/home/home';
-import { MainLayoutUser } from './layout/user/main-layout/main-layout';
 import { JornadaNoValidada } from './features/admin/JornadaNoValidada/JornadaNoValidada';
 import { ProyectosComponent } from './features/user/proyectos.component/proyectos.component';
 import { ProyectosDetallesComponent } from './features/user/proyectos-detalles.component/proyectos-detalles.component';
 import { TareasComponent } from './features/user/tareas.component/tareas.component';
+import { TareasDetallesComponent } from './features/user/tareas-detalles.component/tareas-detalles.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -51,7 +51,7 @@ export const routes: Routes = [
 
   {
     path: 'user',
-    component: MainLayoutUser,
+    component: MainLayout,
     canActivate: [authGuard],
     //canActivateChild: [authGuard],
     children: [
@@ -60,6 +60,7 @@ export const routes: Routes = [
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:id', component: ProyectosDetallesComponent },
       { path: 'tareas', component: TareasComponent },
+      { path: 'tareas/:id', component: TareasDetallesComponent }
         ]
   },
 

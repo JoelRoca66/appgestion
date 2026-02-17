@@ -31,7 +31,7 @@ interface ActiveFilter {
   imports: [
     CommonModule, FormsModule, TableModule, InputTextModule, ButtonModule,
     SelectModule, InputNumberModule, DatePickerModule, PopoverModule,
-    ChipModule, ProgressBarModule, TagModule,RouterModule
+    ChipModule, ProgressBarModule, TagModule, RouterModule
   ],
   templateUrl: './proyectos.component.html',
   styleUrls: ['./proyectos.component.css'],
@@ -65,7 +65,7 @@ export class ProyectosComponent implements OnInit {
 
   activeFilters: ActiveFilter[] = [];
 
-  constructor(private projectService: ProjectService, private cdr: ChangeDetectorRef, private router: Router) {}
+  constructor(private projectService: ProjectService, private cdr: ChangeDetectorRef, private router: Router) { }
 
   ngOnInit() {
     this.searchSubject.pipe(
@@ -162,8 +162,8 @@ export class ProyectosComponent implements OnInit {
     }
   }
   goToProjectDetail(projectId: number) {
-  this.router.navigate(['/user/proyectos', projectId]);
-}
+    this.router.navigate(['/user/proyectos', projectId]);
+  }
 
 
 }

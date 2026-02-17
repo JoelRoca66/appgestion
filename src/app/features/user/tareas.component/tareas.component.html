@@ -136,7 +136,7 @@
           <tr>
             <td>
               <div class="flex flex-column">
-                <span class="font-bold text-900">{{ t.nombre }}</span>
+                <span (click)="goToTaskDetail(t.id)" class="font-bold text-900">{{ t.nombre }}</span>
                 <span class="text-500 text-sm" *ngIf="t.proyecto">
                   <i class="pi pi-folder mr-1 text-xs"></i>{{ t.proyecto.nombre }}
                 </span>

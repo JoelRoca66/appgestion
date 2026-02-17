@@ -30,7 +30,7 @@ import { ProjectDTO } from '../../../core/models/project.model';
 import { TaskFilter } from '../../../core/models/taskFilter.model';
 import { JornadaDTO } from '../../../core/models/record.model';
 import { RecordService } from '../../../core/services/record.service';
-
+import { Route, Router, RouterModule } from '@angular/router';
 
 interface ActiveFilter {
   key: string;
@@ -45,7 +45,7 @@ interface ActiveFilter {
     CommonModule, FormsModule, TableModule, ButtonModule, DialogModule,
     ToastModule, InputNumberModule, DatePickerModule, SelectModule,
     PopoverModule, ChipModule, TagModule, DividerModule, BadgeModule,
-    InputTextModule, IconFieldModule, InputIconModule
+    InputTextModule, IconFieldModule, InputIconModule, RouterModule
   ],
   providers: [MessageService],
   templateUrl: './tareas.component.html',
@@ -107,8 +107,9 @@ export class TareasComponent implements OnInit {
     private projectService: ProjectService,
     private jornadaService: RecordService,
     private cdr: ChangeDetectorRef,
-    private auth: AuthService // ⚠️ inyecta tu servicio real
-  ) {}
+    private auth: AuthService, // ⚠️ inyecta tu servicio real
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.searchSubject.pipe(
@@ -325,5 +326,9 @@ export class TareasComponent implements OnInit {
       case 'REVISION': return 'secondary';
       default: return 'contrast';
     }
+  }
+
+  goToTaskDetail(taskId: number) {
+    this.router.navigate(['/user/tareas', taskId]);
   }
 }
