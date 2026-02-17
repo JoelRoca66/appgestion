@@ -86,4 +86,6 @@ export class TaskService {
     getAllTaskNamesFromProject(id: number): Observable<TaskListDTO[]> {
         return this.http.get<TaskListDTO[]>(`${this.apiUrl}/all/nombres`, { params: { id } });
     }
+    getNameById(id: number): Observable<string> {
+        return this.http.get<string>(`${this.apiUrl}/nombre/${id}`);}
 }

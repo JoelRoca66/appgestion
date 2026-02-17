@@ -62,4 +62,7 @@ export class ProjectService {
     getAllProjectNames(): Observable<ProjectDTO[]> {
         return this.http.get<ProjectDTO[]>(`${this.apiUrl}/all/nombres`);
     }
+    getNameById(id: number): Observable<string> {
+        return this.http.get<string>(`${this.apiUrl}/${id}/nombre`);
+    }
 }

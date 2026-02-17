@@ -7,6 +7,7 @@ import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree'
 import { TreeNode } from 'primeng/api';
+import { ProjectService } from '../../../core/services/project.service';
 
 @Component({
   standalone: true,
@@ -27,13 +28,15 @@ export class TareasDetallesComponent implements OnInit {
   private loadingNodes = new Set<string>(); // Para trackear nodos en carga
 
   private cdr = inject(ChangeDetectorRef);
-
+  projectName: string = '';
+  tareaPadreName: string = '';
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
+    private proyectService: ProjectService
   ) { }
 
-private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
+  private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
     const hasKnownChildren = Array.isArray(task.subtareas);
     const mayHaveChildren = task.subtareas === null;
 
@@ -67,6 +70,22 @@ private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
     this.taskService.findById(id).subscribe({
       next: (res) => {
         this.tarea = res;
+
+
+        if (res.id_proyecto) {
+          this.proyectService.findById(res.id_proyecto).subscribe(p => {
+            this.projectName = p.nombre;
+            this.cdr.markForCheck();
+          });
+        }
+
+        if (res.tarea_padre) {
+          this.taskService.getNameById(res.tarea_padre).subscribe(name => {
+            this.tareaPadreName = name;
+            this.cdr.markForCheck();
+          });
+        }
+
         this.taskTree = (res.subtareas || []).map(t =>
           this.mapTaskToTreeNode(t)
         );
@@ -75,7 +94,7 @@ private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
     });
   }
 
-onNodeExpand(event: any) {
+  onNodeExpand(event: any) {
     const node = event.node as TreeNode;
     const task = node.data as TareaLazyDTO;
     const nodeKey = node.key as string;
@@ -96,14 +115,13 @@ onNodeExpand(event: any) {
     node.children = [{
       key: `loading-${nodeKey}`,
       label: 'Cargando subtareas...',
-      // NO PONGAS icon aquí - PrimeNG lo renderiza aparte
-      // icon: 'pi pi-spin pi-spinner',  ❌ QUITAR ESTO
+
       selectable: false,
       styleClass: 'text-color-secondary loading-node', // Agregar clase custom
       leaf: true,
       data: null // Asegurar que no tenga data
     }];
-    
+
     this.cdr.detectChanges();
 
     this.taskService.findById(task.id).subscribe({

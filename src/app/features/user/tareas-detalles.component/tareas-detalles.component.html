@@ -67,12 +67,12 @@
               <div class="flex align-items-center">
                 <i class="pi pi-briefcase text-teal-500 mr-2"></i>
                 <span class="text-700"><strong>Proyecto:</strong></span>
-                <span class="ml-2 text-900">#{{ tarea?.id_proyecto ?? 'N/A' }}</span>
+                <span class="ml-2 text-900">{{ projectName || 'Proyecto desconocido' }}</span>
               </div>
               <div class="flex align-items-center">
                 <i class="pi pi-sitemap text-orange-500 mr-2"></i>
                 <span class="text-700"><strong>Tarea padre:</strong></span>
-                <span class="ml-2 text-900">{{ tarea?.tarea_padre ?? 'N/A' }}</span>
+                <span class="ml-2 text-900">{{ tareaPadreName || 'Sin tarea padre' }}</span>
               </div>
             </div>
           </div>
