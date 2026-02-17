@@ -78,7 +78,7 @@ export class TareasDetallesComponent implements OnInit {
             this.cdr.markForCheck();
           });
         }
-
+        console.log('Tarea cargada:', res);
         if (res.tarea_padre) {
           this.taskService.getNameById(res.tarea_padre).subscribe(name => {
             this.tareaPadreName = name;
