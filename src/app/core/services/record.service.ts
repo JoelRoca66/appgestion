@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RecordFilter } from '../models/recordFilter.model';
-import { Record } from '../models/record.model';
+import { JornadaDTO, Record } from '../models/record.model';
 
 
 export interface PageResponse<T> {
@@ -13,7 +13,7 @@ export interface PageResponse<T> {
     size: number;
 }
 
-@Injectable({ providedIn: 'root'})
+@Injectable({ providedIn: 'root' })
 export class RecordService {
     private http = inject(HttpClient)
     private apiUrl = 'http://localhost:8080/jornada';
@@ -26,7 +26,7 @@ export class RecordService {
         const params = new HttpParams()
             .set('fecha_desde', filter.fecha_desde ? filter.fecha_desde.toLocaleDateString('sv') : '')
             .set('fecha_hasta', filter.fecha_hasta ? filter.fecha_hasta.toLocaleDateString('sv') : '')
-            .set('validado', filter.validado )
+            .set('validado', filter.validado)
             .set('page', page.toString())
             .set('size', size.toString());
         return this.http.get<PageResponse<any>>(
@@ -40,7 +40,7 @@ export class RecordService {
     }
 
     updateRecord(record: Record): Observable<Record> {
-        const aux = { 
+        const aux = {
             id: record.id,
             fecha: record.fecha.toLocaleDateString('sv'),
             horas: record.horas,
@@ -58,10 +58,15 @@ export class RecordService {
     findById(id: number): Observable<Record> {
         return this.http.get<Record>(`${this.apiUrl}/find/${id}`);
     }
-    countNoValidadas(): Observable<number>{
+    countNoValidadas(): Observable<number> {
         return this.http.get<number>(`${this.apiUrl}/count/no_validadas`);
     }
     getNoValdidas(page: number, size: number): Observable<PageResponse<Record>> {
         return this.http.get<PageResponse<Record>>(`${this.apiUrl}/all/no_validadas`, { params: { page, size } });
     }
+
+    addJornada(dto: JornadaDTO): Observable<void> {
+        return this.http.post<void>(`${this.apiUrl}/add`, dto);
+    }
+
 }

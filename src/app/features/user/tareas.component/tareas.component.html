@@ -1,0 +1,204 @@
+<!-- features/users/user-tasks/user-tasks.component.html -->
+<p-toast></p-toast>
+
+<div class="grid">
+  <div class="col-12">
+    <div class="card shadow-2 border-round p-4 surface-card">
+      <div class="flex justify-content-between align-items-center mb-4">
+        <h1 class="m-0 text-900 font-bold">Tareas disponibles</h1>
+        <!-- Sin botón "Nueva" -->
+      </div>
+
+      <p-table #dt [value]="tasks" [lazy]="true" (onLazyLoad)="loadTasks($event)" [totalRecords]="totalRecords"
+        [loading]="loading" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5,10,20]"
+        [tableStyle]="{ 'min-width': '60rem' }" styleClass="p-datatable-striped" dataKey="id">
+
+        <ng-template pTemplate="caption">
+          <div class="flex flex-column md:flex-row md:align-items-center justify-content-between gap-3">
+
+            <div class="flex align-items-center gap-2 flex-wrap">
+              <p-button label="Filtros" icon="pi pi-filter" severity="secondary" outlined="true"
+                (click)="op.toggle($event)"></p-button>
+
+              <div class="flex gap-2 flex-wrap">
+                @for (filter of activeFilters; track filter.key) {
+                <p-chip [label]="filter.label" [removable]="false"
+                  class="font-semibold text-sm surface-100 text-primary border-primary">
+                  <i class="pi pi-filter mr-2 text-xs"></i>
+                </p-chip>
+                }
+              </div>
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+              <p-iconField style="width: 250px;">
+                <p-inputIcon class="pi pi-search"></p-inputIcon>
+                <input pInputText type="text" (input)="onSearch($event)" placeholder="Buscar por nombre..." />
+              </p-iconField>
+            </div>
+          </div>
+        </ng-template>
+
+        <p-popover #op [style]="{width: '500px'}">
+          <div class="flex flex-column gap-3 p-3">
+            <span class="text-xl font-bold text-900 mb-2">Filtrar Tareas</span>
+
+            <div class="formgrid grid">
+              <div class="field col-6">
+                <label class="font-semibold block mb-2">Estado</label>
+                <p-select [options]="estados" [(ngModel)]="filterEstado" placeholder="Todos" [showClear]="true"
+                  optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full">
+                </p-select>
+              </div>
+              <div class="field col-6">
+                <label class="font-semibold block mb-2">Tipo</label>
+                <p-select [options]="tipos" [(ngModel)]="filterTipo" placeholder="Todos" [showClear]="true"
+                  optionLabel="label" optionValue="value" appendTo="body" styleClass="w-full">
+                </p-select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="font-semibold block mb-2">Proyecto</label>
+              <p-select [options]="projects" [(ngModel)]="filterProyecto" (onChange)="onFilterProjectChange()"
+                placeholder="Seleccionar Proyecto" [showClear]="true" optionLabel="nombre" appendTo="body"
+                styleClass="w-full" [filter]="true" filterBy="nombre">
+              </p-select>
+            </div>
+
+            <div class="field">
+              <label class="font-semibold block mb-2">Tarea Padre (Filtrar Subtareas)</label>
+              <p-select [options]="filterParentTasks" [(ngModel)]="filterPadre" [disabled]="!filterProyecto"
+                [placeholder]="filterProyecto ? 'Seleccionar Tarea Padre' : 'Seleccione primero un proyecto'"
+                [showClear]="true" optionLabel="nombre" appendTo="body" styleClass="w-full" [filter]="true"
+                filterBy="nombre">
+              </p-select>
+            </div>
+
+            <p-divider styleClass="my-2"></p-divider>
+
+            <div class="flex flex-column gap-3">
+              <div>
+                <label class="block text-sm font-bold text-700 mb-2">Fecha de Inicio (Rango)</label>
+                <div class="formgrid grid">
+                  <div class="col-6">
+                    <p-datepicker [(ngModel)]="filterFechaIniDesde" placeholder="Desde" appendTo="body"
+                      dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                      inputStyleClass="w-full"></p-datepicker>
+                  </div>
+                  <div class="col-6">
+                    <p-datepicker [(ngModel)]="filterFechaIniHasta" placeholder="Hasta" appendTo="body"
+                      dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                      inputStyleClass="w-full"></p-datepicker>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-700 mb-2">Fecha de Fin (Rango)</label>
+                <div class="formgrid grid">
+                  <div class="col-6">
+                    <p-datepicker [(ngModel)]="filterFechaFinDesde" placeholder="Desde" appendTo="body"
+                      dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                      inputStyleClass="w-full"></p-datepicker>
+                  </div>
+                  <div class="col-6">
+                    <p-datepicker [(ngModel)]="filterFechaFinHasta" placeholder="Hasta" appendTo="body"
+                      dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full"
+                      inputStyleClass="w-full"></p-datepicker>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-content-end gap-2 mt-3 pt-3 border-top-1 surface-border">
+              <p-button label="Limpiar" icon="pi pi-times" severity="secondary" [text]="true"
+                (click)="clearFilters(); op.hide()"></p-button>
+              <p-button label="Aplicar Filtros" icon="pi pi-check" (click)="applyFilters(); op.hide()"></p-button>
+            </div>
+          </div>
+        </p-popover>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:25%">Nombre</th>
+            <th style="width:10%">Tipo</th>
+            <th style="width:10%">Estado</th>
+            <th style="width:10%">Horas Est.</th>
+            <th style="width:10%">Inicio</th>
+            <th style="width:10%">Fin</th>
+            <th style="width:10%">Subtareas</th>
+            <th style="width:15%; text-align: center">Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-t>
+          <tr>
+            <td>
+              <div class="flex flex-column">
+                <span class="font-bold text-900">{{ t.nombre }}</span>
+                <span class="text-500 text-sm" *ngIf="t.proyecto">
+                  <i class="pi pi-folder mr-1 text-xs"></i>{{ t.proyecto.nombre }}
+                </span>
+              </div>
+            </td>
+            <td>{{ t.tipo }}</td>
+            <td><p-tag [value]="t.estado" [severity]="getSeverity(t.estado)"></p-tag></td>
+            <td><span class="font-medium">{{ t.horas_estimadas }} h</span></td>
+            <td>{{ t.fecha_ini | date:'dd/MM/yyyy' }}</td>
+            <td>{{ t.fecha_fin | date:'dd/MM/yyyy' }}</td>
+            <td class="text-center">
+              <p-badge [value]="t.subtareas_ids?.length || '0'" severity="secondary"></p-badge>
+            </td>
+            <td class="text-center">
+              <div class="flex gap-2 justify-content-center">
+                <!-- ÚNICA ACCIÓN PARA USUARIO -->
+                <p-button icon="pi pi-clock" label="Apuntar jornada" severity="info"
+                  (onClick)="openJornadaDialog(t)"></p-button>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+  </div>
+</div>
+
+<!-- Diálogo Jornada -->
+<p-dialog [(visible)]="jornadaDialog" [style]="{ width: '750px' }" header="Apuntar jornada" [modal]="true"
+  styleClass="p-fluid" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="content">
+    <div class="flex flex-column gap-3 pt-1">
+      <div class="text-900 font-bold" *ngIf="selectedTask">
+        Tarea: <span class="text-primary">{{ selectedTask.nombre }}</span>
+      </div>
+
+      <div class="formgrid grid">
+        <div class="field col-6 mb-0">
+          <label class="font-bold">Fecha</label>
+          <p-datepicker [(ngModel)]="jornadaFecha" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+            styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+        </div>
+        <div class="field col-6 mb-0">
+          <label class="font-bold">Horas</label>
+          <p-inputNumber [(ngModel)]="jornadaHoras" [min]="1" [max]="12" [showButtons]="true" buttonLayout="horizontal"
+            inputStyleClass="text-center font-bold" styleClass="w-full" decrementButtonClass="p-button-secondary"
+            incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"></p-inputNumber>
+        </div>
+      </div>
+
+      <small class="text-600">* Se enviará para validación.</small>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+        (click)="hideJornadaDialog()"></button>
+      <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" [loading]="savingJornada"
+        (click)="saveJornada()"></button>
+    </div>
+  </ng-template>
+</p-dialog>

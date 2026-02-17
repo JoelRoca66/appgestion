@@ -24,7 +24,7 @@ export class TaskService {
 
     searchTask(filter: TaskFilter, page: number, size: number): Observable<PageResponse<TaskDTO>> {
         const params = new HttpParams()
-            .set('texto', filter.term)
+            .set('term', filter.term)
             .set('tipo', filter.tipo ? filter.tipo : '')
             .set('estado', filter.estado ? filter.estado : '')
             .set('fecha_inicio_desde', filter.fecha_inicio_desde ? filter.fecha_inicio_desde.toLocaleDateString('sv') : '')

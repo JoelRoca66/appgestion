@@ -18,6 +18,7 @@ import { MainLayoutUser } from './layout/user/main-layout/main-layout';
 import { JornadaNoValidada } from './features/admin/JornadaNoValidada/JornadaNoValidada';
 import { ProyectosComponent } from './features/user/proyectos.component/proyectos.component';
 import { ProyectosDetallesComponent } from './features/user/proyectos-detalles.component/proyectos-detalles.component';
+import { TareasComponent } from './features/user/tareas.component/tareas.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -58,6 +59,7 @@ export const routes: Routes = [
       { path: 'home', component: UserHomeComponent },
       { path: 'proyectos', component: ProyectosComponent },
       { path: 'proyectos/:id', component: ProyectosDetallesComponent },
+      { path: 'tareas', component: TareasComponent },
         ]
   },
 

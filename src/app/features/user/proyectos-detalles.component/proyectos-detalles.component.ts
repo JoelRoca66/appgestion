@@ -17,8 +17,7 @@ import { TreeNode } from 'primeng/api';
     CardModule,
     TreeModule,
     TagModule
-  ]
-  ,
+  ],
   templateUrl: './proyectos-detalles.component.html',
   styleUrls: ['./proyectos-detalles.component.css']
 })
@@ -26,6 +25,9 @@ export class ProyectosDetallesComponent implements OnInit {
 
   proyecto: ProyectoTareasDTO | null = null;
   taskTree: TreeNode[] = [];
+  private loadingNodes = new Set<string>(); // Para trackear nodos en carga
+
+  private cdr = inject(ChangeDetectorRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -33,31 +35,30 @@ export class ProyectosDetallesComponent implements OnInit {
     private taskService: TaskService,
   ) { }
 
-  private cdr = inject(ChangeDetectorRef);
-
 private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
-  const hasUnknownChildren = task.subtareas === null; 
-  const hasKnownChildren = Array.isArray(task.subtareas);
+    const hasKnownChildren = Array.isArray(task.subtareas);
+    const mayHaveChildren = task.subtareas === null;
 
-  const children = hasKnownChildren
-    ? (task.subtareas as TareaLazyDTO[]).map(t => this.mapTaskToTreeNode(t))
-    : undefined;
+    let children: TreeNode[] = [];
+    let isLeaf = true;
 
-  return {
-    key: task.id.toString(),
-    label: task.nombre,
-    data: task,
-    icon: 'pi pi-list',
-    children,
+    if (hasKnownChildren) {
+      children = (task.subtareas as TareaLazyDTO[]).map(t => this.mapTaskToTreeNode(t));
+      isLeaf = children.length === 0;
+    } else if (mayHaveChildren) {
+      children = [];
+      isLeaf = false;
+    }
 
-    leaf: hasKnownChildren ? children!.length === 0 : false
+    return {
+      key: task.id.toString(),
+      label: task.nombre,
+      data: task,
+      icon: 'pi pi-list',
+      children: children,
+      leaf: isLeaf
+    }
   }
-}
-
-
-
-
-
 
   ngOnInit(): void {
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
@@ -68,45 +69,130 @@ private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
     this.projectService.findById(id).subscribe({
       next: (res) => {
         this.proyecto = res;
-
         this.taskTree = (res.tareas_principales || []).map(t =>
           this.mapTaskToTreeNode(t)
         );
-
         this.cdr.markForCheck();
       }
     });
   }
 
 onNodeExpand(event: any) {
-  const node = event.node as TreeNode;
-  const task = node.data as TareaLazyDTO;
+    const node = event.node as TreeNode;
+    const task = node.data as TareaLazyDTO;
+    const nodeKey = node.key as string;
 
-  if (node.children && node.children.length > 0) {
-    return;
+    if (this.loadingNodes.has(nodeKey)) {
+      return;
+    }
+
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      const hasRealChildren = node.children.some(child => child.data);
+      if (hasRealChildren) {
+        return;
+      }
+    }
+
+    this.loadingNodes.add(nodeKey);
+
+    node.children = [{
+      key: `loading-${nodeKey}`,
+      label: 'Cargando subtareas...',
+      // NO PONGAS icon aquí - PrimeNG lo renderiza aparte
+      // icon: 'pi pi-spin pi-spinner',  ❌ QUITAR ESTO
+      selectable: false,
+      styleClass: 'text-color-secondary loading-node', // Agregar clase custom
+      leaf: true,
+      data: null // Asegurar que no tenga data
+    }];
+    
+    this.cdr.detectChanges();
+
+    this.taskService.findById(task.id).subscribe({
+      next: (res) => {
+        const sub = res.subtareas ?? [];
+        node.children = sub.map(t => this.mapTaskToTreeNode(t));
+        node.leaf = sub.length === 0;
+        this.loadingNodes.delete(nodeKey);
+        this.taskTree = this.deepCloneTree(this.taskTree);
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error cargando subtareas:', err);
+        node.children = [{
+          key: `error-${nodeKey}`,
+          label: 'Error al cargar subtareas',
+          // icon: 'pi pi-exclamation-triangle', ❌ QUITAR
+          styleClass: 'text-red-500 error-node',
+          selectable: false,
+          leaf: true,
+          data: null
+        }];
+        node.leaf = false;
+        this.loadingNodes.delete(nodeKey);
+        this.taskTree = this.deepCloneTree(this.taskTree);
+        this.cdr.detectChanges();
+      }
+    });
+  }
+  private deepCloneTree(nodes: TreeNode[]): TreeNode[] {
+    return nodes.map(node => {
+      const clonedNode: TreeNode = {
+        ...node,
+        data: { ...node.data }
+      };
+
+      if (node.children) {
+        clonedNode.children = this.deepCloneTree(node.children);
+      }
+
+      return clonedNode;
+    });
+  }
+  getEstadoSeverity(estado: string): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" {
+    if (!estado) return 'secondary';
+    const severityMap: { [key: string]: "success" | "secondary" | "info" | "warn" | "danger" | "contrast" } = {
+      'COMPLETADO': 'success',
+      'COMPLETADA': 'success',
+      'EN_PROGRESO': 'info',
+      'EN PROGRESO': 'info',
+      'PENDIENTE': 'warn',
+      'CANCELADO': 'danger',
+      'CANCELADA': 'danger',
+      'BLOQUEADO': 'danger',
+      'BLOQUEADA': 'danger'
+    };
+
+    return severityMap[estado?.toUpperCase()] || 'secondary';
+  }
+  getTareaIcon(tipo: string): string {
+    const iconMap: Record<string, string> = {
+      'DESARROLLO': 'code',
+      'TECNICA': 'cog',
+      'DISEÑO': 'palette',
+      'BUG': 'bug',
+      'TESTING': 'check-circle',
+      'DOCUMENTACION': 'file-edit'
+    };
+
+    return iconMap[tipo] || 'circle';
   }
 
-  node.loading = true;
+  getTareaIconColor(tipo: string): string {
+    const colorMap: Record<string, string> = {
+      'DESARROLLO': 'text-blue-500',
+      'TECNICA': 'text-purple-500',
+      'DISEÑO': 'text-pink-500',
+      'BUG': 'text-red-500',
+      'TESTING': 'text-green-500',
+      'DOCUMENTACION': 'text-orange-500'
+    };
 
-  this.taskService.findById(task.id).subscribe({
-    next: (res) => {
-      const sub = res.subtareas ?? []; 
-      node.children = sub.map(t => this.mapTaskToTreeNode(t));
+    return colorMap[tipo] || 'text-gray-500';
+  }
 
-
-      node.leaf = node.children.length === 0;
-
-      node.loading = false;
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      node.loading = false;
-    }
-  });
-}
-
-
-
-
+  getTotalTareas(): number {
+    return this.taskTree.length;
+  }
 
 }

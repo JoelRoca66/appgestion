@@ -9,3 +9,11 @@ export interface Record {
     id_tarea: TaskListDTO;
     id_trabajador: WorkerNameDTO;
 }
+
+export interface JornadaDTO {
+  fecha: string;
+  horas: number;
+  validado: boolean;
+  id_tarea: number;
+  id_trabajador: number;
+}

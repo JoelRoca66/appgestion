@@ -1,46 +1,100 @@
 <div class="grid">
 
+  <!-- Card del Proyecto -->
   <div class="col-12">
-    <p-card>
+    <p-card styleClass="shadow-2">
       <ng-template pTemplate="header">
-        <div class="flex justify-content-between align-items-center">
-          <h2 class="m-1 mt-3 ml-3">{{ proyecto?.nombre }}</h2>
-          <p-tag
-            [value]="proyecto?.estado"
-            class="mt-3 mr-3">
+        <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
+          <div>
+            <h2 class="m-0 text-primary">{{ proyecto?.nombre }}</h2>
+          </div>
+          <p-tag [value]="proyecto?.estado || 'N/A'" [severity]="getEstadoSeverity(proyecto?.estado || '')"
+            [rounded]="true" styleClass="text-sm font-semibold">
           </p-tag>
         </div>
       </ng-template>
 
-      <div class="grid mt-3">
+      <div class="grid">
         <div class="col-12 md:col-6">
-          <p><strong>Descripción</strong></p>
-          <p class="text-color-secondary">{{ proyecto?.descripcion }}</p>
+          <div class="mb-3">
+            <p class="text-900 font-semibold mb-2 flex align-items-center">
+              <i class="pi pi-file-edit mr-2 text-primary"></i>
+              Descripción
+            </p>
+            <p class="text-600 line-height-3">{{ proyecto?.descripcion || 'Sin descripción' }}</p>
+          </div>
         </div>
 
         <div class="col-12 md:col-6">
-          <div class="flex flex-column gap-2">
-            <span><strong>Inicio:</strong> {{ proyecto?.fecha_ini | date:'dd/MM/yyyy' }}</span>
-            <span><strong>Fin:</strong> {{ proyecto?.fecha_fin | date:'dd/MM/yyyy' }}</span>
-            <span><strong>Margen:</strong> {{ proyecto?.margen_beneficio }}%</span>
+          <div class="surface-50 border-round p-3">
+            <div class="flex flex-column gap-3">
+              <div class="flex align-items-center">
+                <i class="pi pi-calendar text-green-500 mr-2"></i>
+                <span class="text-700"><strong>Inicio:</strong></span>
+                <span class="ml-2 text-900">{{ proyecto?.fecha_ini | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="flex align-items-center">
+                <i class="pi pi-calendar-times text-red-500 mr-2"></i>
+                <span class="text-700"><strong>Fin:</strong></span>
+                <span class="ml-2 text-900">{{ proyecto?.fecha_fin | date:'dd/MM/yyyy' }}</span>
+              </div>
+              <div class="flex align-items-center">
+                <i class="pi pi-chart-line text-blue-500 mr-2"></i>
+                <span class="text-700"><strong>Margen:</strong></span>
+                <span class="ml-2 text-900 font-semibold">{{ proyecto?.margen_beneficio }}%</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </p-card>
   </div>
 
+  <!-- Card de Tareas -->
   <div class="col-12">
-    <p-card>
+    <p-card styleClass="shadow-2">
       <ng-template pTemplate="header">
-        <h3 class="m-0 pt-3 ml-3">Tareas del Proyecto</h3>
+        <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
+          <h3 class="m-0 text-primary flex align-items-center">
+            <i class="pi pi-list mr-2"></i>
+            Tareas del Proyecto
+          </h3>
+          <span class="text-sm text-600">{{ getTotalTareas() }} tarea(s)</span>
+        </div>
       </ng-template>
+      <p-tree [value]="taskTree" selectionMode="single" (onNodeExpand)="onNodeExpand($event)"
+        class="w-full custom-tree">
+        <ng-template let-node pTemplate="default">
+          <!-- Nodo de tarea real (con data) -->
+          <div *ngIf="node?.data" class="flex align-items-center justify-content-between w-full py-2">
+            <div class="flex align-items-center flex-1">
+              <i [class]="'pi pi-' + getTareaIcon(node.data.tipo) + ' mr-2 ' + getTareaIconColor(node.data.tipo)"></i>
+              <span class="font-medium">{{ node.label }}</span>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <p-tag [value]="node.data.estado || 'N/A'" [severity]="getEstadoSeverity(node.data.estado)"
+                [rounded]="true" styleClass="text-xs"></p-tag>
+              <span class="text-sm text-500">
+                <i class="pi pi-clock mr-1"></i>
+                {{ node.data.horas_estimadas ?? 0 }}h
+              </span>
+            </div>
+          </div>
 
-      <p-tree
-        [value]="taskTree"
-        [lazy]="true"
-        selectionMode="single"
-        (onNodeExpand)="onNodeExpand($event)"
-        class="w-full">
+          <!-- Nodo de carga (sin data, con clase loading-node) -->
+          <div *ngIf="!node?.data && node.styleClass?.includes('loading-node')"
+            class="flex align-items-center w-full py-2">
+            <i class="pi pi-spin pi-spinner mr-2 text-color-secondary"></i>
+            <span class="text-color-secondary">{{ node.label }}</span>
+          </div>
+
+          <!-- Nodo de error (sin data, con clase error-node) -->
+          <div *ngIf="!node?.data && node.styleClass?.includes('error-node')"
+            class="flex align-items-center w-full py-2">
+            <i class="pi pi-exclamation-triangle mr-2 text-red-500"></i>
+            <span class="text-red-500">{{ node.label }}</span>
+          </div>
+        </ng-template>
       </p-tree>
     </p-card>
   </div>
