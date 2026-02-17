@@ -221,7 +221,7 @@ export class ProyectosDetallesComponent implements OnInit {
   }
 
   getEstadoSeverity(estado: string): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" {
-    const map: Record<string, any> = { COMPLETADO: 'success', COMPLETADA: 'success', EN_PROGRESO: 'info', PENDIENTE: 'warn', CANCELADO: 'danger', CANCELADA: 'danger', BLOQUEADO: 'danger', BLOQUEADA: 'danger' };
+    const map: Record<string, any> = { COMPLETADO: 'success', COMPLETADA: 'success', EN_PROCESO: 'info', PENDIENTE: 'warn', CANCELADO: 'danger', CANCELADA: 'danger', BLOQUEADO: 'danger', BLOQUEADA: 'danger' };
     return map[estado?.toUpperCase()] || 'secondary';
   }
 

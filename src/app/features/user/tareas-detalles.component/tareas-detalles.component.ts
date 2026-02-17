@@ -151,8 +151,8 @@ onNodeExpand(event: any) {
     const severityMap: { [key: string]: "success" | "secondary" | "info" | "warn" | "danger" | "contrast" } = {
       'COMPLETADO': 'success',
       'COMPLETADA': 'success',
-      'EN_PROGRESO': 'info',
-      'EN PROGRESO': 'info',
+      'EN_PROCESO': 'info',
+      'EN PROCESO': 'info',
       'PENDIENTE': 'warn',
       'CANCELADO': 'danger',
       'CANCELADA': 'danger',
