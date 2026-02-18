@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
-import { AdminDashboard } from './features/admin/admin-dashboard/admin-dashboard';
 import { Maintenance } from './features/admin/maintenance/maintenance';
 import { MaintenanceCategory } from './features/admin/maintenance-category/maintenance-category';
 import { MaintenanceWorker } from './features/admin/maintenance-worker/maintenance-worker';
@@ -20,23 +19,24 @@ import { ProyectosDetallesComponent } from './features/user/proyectos-detalles.c
 import { TareasComponent } from './features/user/tareas.component/tareas.component';
 import { TareasDetallesComponent } from './features/user/tareas-detalles.component/tareas-detalles.component';
 import { KanbanComponent } from './features/user/kanban/kanban';
+import { Configuracion } from './features/user/configuracion/configuracion';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
 
-{
-  path: 'login',
-  component: Login,
-  canActivate: [guestGuard]
-},
+  {
+    path: 'login',
+    component: Login,
+    canActivate: [guestGuard]
+  },
 
   {
     path: 'admin',
     component: MainLayout,
     canActivate: [authGuard, adminGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: AdminDashboard },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: UserHomeComponent },
       { path: 'mantenimiento', component: Maintenance },
       { path: 'mantenimiento/categorias', component: MaintenanceCategory },
       { path: 'mantenimiento/trabajadores', component: MaintenanceWorker },
@@ -63,7 +63,8 @@ export const routes: Routes = [
       { path: 'tareas', component: TareasComponent },
       { path: 'tareas/:id', component: TareasDetallesComponent },
       { path: 'kanban', component: KanbanComponent },
-        ]
+      { path: 'config', component: Configuracion }
+    ]
   },
 
   { path: '**', redirectTo: '/login' }

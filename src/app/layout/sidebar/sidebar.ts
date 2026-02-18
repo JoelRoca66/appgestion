@@ -25,7 +25,6 @@ export class Sidebar implements OnInit {
 
     if (isAdmin) {
       this.items.push(
-        { label: 'Dashboard', icon: 'pi pi-th-large', routerLink: ['/admin/dashboard'] },
         { label: 'Mantenimiento', icon: 'pi pi-wrench', routerLink: ['/admin/mantenimiento'] },
         { label: 'Configuración', icon: 'pi pi-cog', routerLink: ['/admin/config'] }
       );

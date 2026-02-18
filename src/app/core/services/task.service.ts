@@ -82,7 +82,6 @@ export class TaskService {
         return this.http.get<TareaLazyDTO>(`${this.apiUrl}/find/${id}`);
     }
 
-
     getAllTaskNamesFromProject(id: number): Observable<TaskListDTO[]> {
         return this.http.get<TaskListDTO[]>(`${this.apiUrl}/all/nombres`, { params: { id } });
     }

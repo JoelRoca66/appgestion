@@ -71,9 +71,6 @@
   font-weight: 500;
 }
 
-.cdk-drag-animating {
-  transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
-}
 
 .kanban-empty {
   display: flex;

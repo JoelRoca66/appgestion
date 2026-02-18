@@ -7,16 +7,16 @@
         <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
           <div>
             <h2 class="m-0 text-primary flex align-items-center">
-              <i [class]="'pi pi-' + getTareaIcon(tarea?.tipo || '') + ' mr-2 ' + getTareaIconColor(tarea?.tipo || '')"></i>
+              <i
+                [class]="'pi pi-' + getTareaIcon(tarea?.tipo || '') + ' mr-2 ' + getTareaIconColor(tarea?.tipo || '')"></i>
               {{ tarea?.nombre }}
             </h2>
           </div>
           <div class="flex align-items-center gap-2">
-            <p-tag [value]="tarea?.estado || 'N/A'" [severity]="getEstadoSeverity(tarea?.estado || '')"
-              [rounded]="true" styleClass="text-sm font-semibold">
-            </p-tag>
-            <p-tag [value]="tarea?.tipo || 'N/A'" severity="info" [rounded]="true"
+            <p-tag [value]="tarea?.estado || 'N/A'" [severity]="getEstadoSeverity(tarea?.estado || '')" [rounded]="true"
               styleClass="text-sm font-semibold">
+            </p-tag>
+            <p-tag [value]="tarea?.tipo || 'N/A'" severity="info" [rounded]="true" styleClass="text-sm font-semibold">
             </p-tag>
           </div>
         </div>
@@ -90,6 +90,7 @@
             <i class="pi pi-list mr-2"></i>
             Subtareas
           </h3>
+          <p-button *ngIf="isAdmin" label="Nueva Subtarea" icon="pi pi-plus" severity="success" (click)="openNew()"></p-button>
           <span class="text-sm text-600">{{ getTotalTareas() }} tarea(s)</span>
         </div>
       </ng-template>
@@ -131,3 +132,118 @@
   </div>
 
 </div>
+
+<!-- ===== KANBAN DE SUBTAREAS ===== -->
+<div class="grid">
+  <div class="col-12">
+    <p-card styleClass="shadow-2">
+      <ng-template pTemplate="header">
+        <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
+          <h3 class="m-0 text-primary flex align-items-center">
+            <i class="pi pi-tablet mr-2"></i>
+            Kanban de Subtareas
+          </h3>
+          <span class="text-sm text-600">{{ getTotalTareasKanban() }} tarea(s)</span>
+        </div>
+      </ng-template>
+
+      <div class="kanban-board">
+        <div *ngFor="let col of kanbanColumns" class="kanban-col">
+
+          <div class="kanban-col-header" [ngClass]="col.headerClass">
+            <span class="kanban-col-title">{{ col.label }}</span>
+            <p-badge [value]="col.tareas().length.toString()" severity="secondary"></p-badge>
+          </div>
+
+          <div class="kanban-drop-zone" cdkDropList [id]="col.key" [cdkDropListData]="col.tareas()"
+            [cdkDropListConnectedTo]="kanbanColumnIds" (cdkDropListDropped)="onKanbanDrop($event, col)">
+
+            <div *ngFor="let tarea of col.tareas()" class="kanban-card" cdkDrag [cdkDragData]="tarea">
+              <div *cdkDragPlaceholder class="kanban-card-placeholder"></div>
+              <span class="kanban-card-title">{{ tarea.nombre }}</span>
+            </div>
+
+            <div *ngIf="col.tareas().length === 0" class="kanban-empty">
+              <i class="pi pi-inbox"></i>
+              <span>Sin tareas</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </p-card>
+  </div>
+</div>
+
+<p-dialog [(visible)]="taskDialog" [style]="{ width: '600px' }" [header]="dialogTitle" [modal]="true"
+    styleClass="p-fluid" [draggable]="false" [resizable]="false">
+
+    <ng-template pTemplate="content">
+        <div class="flex flex-column gap-3 pt-1">
+            <div class="field mb-0">
+                <label for="nombre" class="font-bold">Nombre de la Tarea</label>
+                <input type="text" pInputText id="nombre" [(ngModel)]="task.nombre" required autofocus class="w-full" />
+                <small class="p-error block mt-1" *ngIf="submitted && !task.nombre">El nombre es requerido.</small>
+            </div>
+
+            <div class="field mb-0">
+                <label for="descripcion" class="font-bold">Descripción</label>
+                <textarea id="descripcion" pTextarea [(ngModel)]="task.descripcion" rows="4" class="w-full"
+                    [autoResize]="false" style="resize: none;"></textarea>
+            </div>
+
+            <div class="formgrid grid">
+                <div class="field col-6 mb-0">
+                    <label for="tipo" class="font-bold">Tipo</label>
+                    <p-select id="tipo" [options]="tipos" [(ngModel)]="task.tipo" optionLabel="label"
+                        optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-full">
+                    </p-select>
+                </div>
+                <div class="field col-6 mb-0">
+                    <label for="estado" class="font-bold">Estado</label>
+                    <p-select id="estado" [options]="estados" [(ngModel)]="task.estado" optionLabel="label"
+                        optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-full">
+                    </p-select>
+                </div>
+            </div>
+
+            <div class="field mb-0">
+                <label for="horas" class="font-bold">Horas Estimadas</label>
+                <p-inputNumber id="horas" [(ngModel)]="task.horas_estimadas" [min]="0" [showButtons]="true"
+                    buttonLayout="horizontal" inputStyleClass="text-center font-bold" styleClass="w-full"
+                    decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
+                    incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus">
+                </p-inputNumber>
+            </div>
+
+            <div class="formgrid grid">
+                <div class="field col-6 mb-0">
+                    <label for="fecha_ini" class="font-bold">Fecha Inicio</label>
+                    <p-datepicker id="fecha_ini" [(ngModel)]="task.fecha_ini" dateFormat="dd/mm/yy" [showIcon]="true"
+                        appendTo="body" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+                </div>
+                <div class="field col-6 mb-0">
+                    <label for="fecha_fin" class="font-bold">Fecha Fin</label>
+                    <p-datepicker id="fecha_fin" [(ngModel)]="task.fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true"
+                        appendTo="body" placeholder="Opcional" styleClass="w-full"
+                        inputStyleClass="w-full"></p-datepicker>
+                </div>
+            </div>
+
+            <div class="field mb-0">
+                <label for="observaciones" class="font-bold">Observaciones</label>
+                <textarea id="observaciones" pTextarea [(ngModel)]="task.observaciones" rows="2"
+                    class="w-full"></textarea>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-content-end gap-2">
+            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+                (click)="hideDialog()"></button>
+            <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" (click)="saveTask()"></button>
+        </div>
+    </ng-template>
+</p-dialog>

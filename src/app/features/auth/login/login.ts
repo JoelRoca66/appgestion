@@ -167,7 +167,7 @@ export class Login {
 
   navigateBasedOnRole(user: User) {
     const isAdmin = user.rol === true;
-    const targetRoute = isAdmin ? '/admin/dashboard' : '/user/home';
+    const targetRoute = isAdmin ? '/user/home' : '/user/home';
         
     this.zone.run(() => {
       this.router.navigate([targetRoute]);

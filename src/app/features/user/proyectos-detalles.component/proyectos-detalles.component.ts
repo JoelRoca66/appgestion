@@ -5,12 +5,19 @@ import { TaskService } from '../../../core/services/task.service';
 import { ProyectoTareasDTO, TareaLazyDTO } from '../../../core/models/project.model';
 import { Task, TaskDTO, TaskState } from '../../../core/models/task.model';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
 import { TreeModule } from 'primeng/tree';
 import { TreeNode } from 'primeng/api';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { ButtonModule } from "primeng/button";
+import { DialogModule } from 'primeng/dialog';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DatePickerModule } from 'primeng/datepicker';
 
 type KanbanColumnKey = 'pendientes' | 'progreso' | 'bloqueadas' | 'revision' | 'completadas';
 
@@ -27,12 +34,19 @@ interface KanbanColumn {
   selector: 'app-proyectos-detalles',
   imports: [
     CommonModule,
+    FormsModule,
     CardModule,
     TreeModule,
     TagModule,
     BadgeModule,
     DragDropModule,
-  ],
+    ButtonModule,
+    DialogModule,
+    SelectModule,
+    TextareaModule,
+    InputNumberModule,
+    DatePickerModule
+],
   templateUrl: './proyectos-detalles.component.html',
   styleUrls: ['./proyectos-detalles.component.css']
 })
@@ -53,6 +67,7 @@ export class ProyectosDetallesComponent implements OnInit {
   ];
 
   kanbanColumnIds = this.kanbanColumns.map(c => c.key);
+  isAdmin = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -62,7 +77,23 @@ export class ProyectosDetallesComponent implements OnInit {
 
   ngOnInit(): void {
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
+    this.detectAdminFromStorage();
     this.loadProject(projectId);
+  }
+
+  private detectAdminFromStorage() {
+    try {
+      const raw = sessionStorage.getItem('currentUser') ?? localStorage.getItem('currentUser');
+      if (!raw) {
+        this.isAdmin = false;
+        return;
+      }
+      const obj = JSON.parse(raw);
+      this.isAdmin = !!obj?.rol;
+    } catch (e) {
+      console.warn('No se pudo parsear currentUser desde storage', e);
+      this.isAdmin = false;
+    }
   }
 
   loadProject(id: number) {
@@ -165,7 +196,6 @@ export class ProyectosDetallesComponent implements OnInit {
     };
   }
 
-  // ── Tree logic (sin cambios) ─────────────────────────
 
   private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
     const hasKnownChildren = Array.isArray(task.subtareas);
@@ -236,4 +266,109 @@ export class ProyectosDetallesComponent implements OnInit {
   }
 
   getTotalTareas(): number { return this.taskTree.length; }
+
+  // ===== Dialog / Form para crear tarea =====
+  taskDialog = false;
+  task: any = this.getEmptyTask();
+  submitted = false;
+  dialogTitle = '';
+
+  parentCandidates: any[] = [];
+  loadingParents = false;
+
+  estados: any[] = [
+    { label: 'Pendiente', value: 'PENDIENTE' },
+    { label: 'En Proceso', value: 'EN_PROCESO' },
+    { label: 'Bloqueada', value: 'BLOQUEADA' },
+    { label: 'Revisión', value: 'REVISION' },
+    { label: 'Completada', value: 'COMPLETADA' }
+  ];
+
+  tipos: any[] = [
+    { label: 'Desarrollo', value: 'DESARROLLO' },
+    { label: 'Bug', value: 'BUG' },
+    { label: 'Documentación', value: 'DOCUMENTACION' },
+    { label: 'Diseño', value: 'DISENO' }
+  ];
+
+  getEmptyTask() {
+    return {
+      id: 0,
+      nombre: '',
+      descripcion: '',
+      tipo: 'DESARROLLO',
+      estado: 'PENDIENTE',
+      horas_estimadas: 0,
+      fecha_ini: undefined,
+      fecha_fin: undefined,
+      observaciones: '',
+      tarea_padre: undefined,
+      id_proyecto: { id: 0, nombre: '' }
+    };
+  }
+
+  openNew() {
+    this.task = this.getEmptyTask();
+    this.dialogTitle = 'Nueva Tarea';
+    if (this.proyecto && this.proyecto.id) {
+      this.task.id_proyecto = { id: this.proyecto.id, nombre: this.proyecto.nombre };
+      this.loadParentsForProject(this.proyecto.id);
+    }
+    this.submitted = false;
+    this.taskDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  loadParentsForProject(projectId: number) {
+    this.loadingParents = true;
+    this.taskService.getAllTaskNamesFromProject(projectId).subscribe({
+      next: (res) => {
+        this.parentCandidates = res.filter((t: any) => t.id !== this.task.id);
+        this.loadingParents = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.parentCandidates = [];
+        this.loadingParents = false;
+      }
+    });
+  }
+
+  onProjectChange() {
+    const pid = this.task.id_proyecto?.id;
+    if (pid) this.loadParentsForProject(pid);
+  }
+
+  hideDialog() {
+    this.taskDialog = false;
+    this.submitted = false;
+  }
+
+  saveTask() {
+    this.submitted = true;
+    if (!this.task.nombre || !this.task.id_proyecto?.id) return;
+
+    const payload: any = {
+      nombre: this.task.nombre,
+      descripcion: this.task.descripcion,
+      tipo: this.task.tipo,
+      estado: this.task.estado,
+      observaciones: this.task.observaciones,
+      horas_estimadas: this.task.horas_estimadas,
+      fecha_ini: this.task.fecha_ini,
+      fecha_fin: this.task.fecha_fin,
+      tarea_padre: this.task.tarea_padre ? { id: this.task.tarea_padre.id } : null,
+      proyecto: { id: this.task.id_proyecto?.id }
+    };
+
+    this.taskService.createTask(payload).subscribe({
+      next: (res) => {
+        this.hideDialog();
+        if (this.proyecto && this.proyecto.id) this.loadProject(this.proyecto.id);
+      },
+      error: (err) => {
+        console.error('Error creando tarea:', err);
+      }
+    });
+  }
 }
