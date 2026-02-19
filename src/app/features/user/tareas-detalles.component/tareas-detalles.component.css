@@ -7,11 +7,15 @@
   align-items: flex-start;
   min-height: 300px;
   padding-bottom: 0.5rem;
+
+  width: 100%;
+
 }
 
 .kanban-col {
-  flex: 0 0 200px;
-  min-width: 200px;
+  flex:1 1 0;
+  min-width: 180px;
+  max-width: 1fr;
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--surface-200);

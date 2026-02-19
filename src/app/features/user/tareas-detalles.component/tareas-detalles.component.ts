@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../../core/services/task.service';
 import { TareaLazyDTO } from '../../../core/models/project.model';
-import { Task, TaskState } from '../../../core/models/task.model'; // ⬅️ importa Task y TaskState
+import { Task, TaskDTO, TaskState } from '../../../core/models/task.model'; // ⬅️ importa Task y TaskState
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
@@ -18,8 +18,12 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
 
 
-import { TreeNode } from 'primeng/api';
+import { MessageService, TreeNode } from 'primeng/api';
 import { SelectModule } from "primeng/select";
+import { AuthService } from '../../../core/services/auth.service';
+import { RecordService } from '../../../core/services/record.service';
+import { JornadaDTO } from '../../../core/models/record.model';
+import { finalize } from 'rxjs/operators';
 
 type KanbanColumnKey = 'pendientes' | 'progreso' | 'bloqueadas' | 'revision' | 'completadas';
 interface KanbanColumn {
@@ -35,20 +39,22 @@ interface KanbanColumn {
   selector: 'app-tareas-detalles',
   imports: [
     CommonModule,
-      FormsModule,
+    FormsModule,
     CardModule,
     TreeModule,
     TagModule,
-    BadgeModule, // ⬅️ añade
-      TextareaModule,
+    BadgeModule,
+    TextareaModule,
     InputNumberModule,
     DatePickerModule,
-    DragDropModule, // ⬅️ añade
+    DragDropModule,
     ButtonModule,
     DialogModule,
     ConfirmDialogModule,
-    SelectModule
-],
+    SelectModule,
+  ],
+  providers: [MessageService],
+
   templateUrl: './tareas-detalles.component.html',
   styleUrls: ['./tareas-detalles.component.css']
 })
@@ -59,6 +65,7 @@ export class TareasDetallesComponent implements OnInit {
   private loadingNodes = new Set<string>();
 
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   // ── Kanban (subtareas directas de esta tarea) ─────────────
   kanbanColumns: KanbanColumn[] = [
@@ -74,16 +81,32 @@ export class TareasDetallesComponent implements OnInit {
   tareaPadreName: string = '';
   isAdmin = false;
 
+  // Diálogo de jornada
+  jornadaDialog = false;
+  jornadaFecha: Date | null = new Date();
+  jornadaHoras: number | null = null;
+  selectedTask: TareaLazyDTO | TaskDTO | null = null;
+  savingJornada = false;
+
+
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
-    private proyectService: TaskService
+    private proyectService: TaskService,
+    private auth: AuthService,
+    private jornadaService: RecordService,
+    private messageService: MessageService,
   ) { }
 
   ngOnInit(): void {
-    const taskId = Number(this.route.snapshot.paramMap.get('id'));
     this.detectAdminFromStorage();
-    this.loadTask(taskId);
+
+    this.route.paramMap.subscribe(params => {
+      const taskId = Number(params.get('id'));
+      if (!isNaN(taskId)) {
+        this.loadTask(taskId);
+      }
+    });
   }
 
   private detectAdminFromStorage() {
@@ -462,4 +485,68 @@ export class TareasDetallesComponent implements OnInit {
   openNew() {
     this.openNewSubtask();
   }
+
+
+  openJornadaDialog(tarea: TareaLazyDTO | TaskDTO | null) {
+    if (!tarea) return;
+    this.selectedTask = tarea;
+    this.jornadaFecha = new Date();
+    this.jornadaHoras = null;
+    this.jornadaDialog = true;
+    this.cdr.markForCheck();
+  }
+
+
+  saveJornada() {
+    if (!this.selectedTask?.id) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Tarea no seleccionada.' });
+      return;
+    }
+    if (!this.jornadaFecha) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'La fecha es obligatoria.' });
+      return;
+    }
+    const horas = this.jornadaHoras ?? 0;
+    if (horas <= 0 || horas > 12) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Horas inválidas (1–12).' });
+      return;
+    }
+
+    const trabajadorId = this.auth.getCurrentWorkerId(); // ⚠️ toma el id real del usuario logado
+    const body: JornadaDTO = {
+      fecha: this.jornadaFecha.toISOString().slice(0, 10), // 'YYYY-MM-DD' para LocalDate
+      horas,
+      validado: false,
+      id_tarea: this.selectedTask.id!,
+      id_trabajador: trabajadorId
+    };
+
+    this.savingJornada = true;
+    this.jornadaService.addJornada(body).pipe(
+      finalize(() => {
+        this.savingJornada = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Jornada registrada', detail: 'Se ha enviado para validación.' });
+        this.jornadaDialog = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo registrar la jornada.' });
+      }
+    });
+  }
+
+  hideJornadaDialog() {
+    this.jornadaDialog = false;
+  }
+
+
+  verDetalleTarea(key: number) {
+    console.log('Navegando a detalle de tarea con id:', key);
+    this.router.navigate(['/user/tareas', key]);
+  }
+
 }

@@ -107,7 +107,7 @@ export class TareasComponent implements OnInit {
     private projectService: ProjectService,
     private jornadaService: RecordService,
     private cdr: ChangeDetectorRef,
-    private auth: AuthService, // ⚠️ inyecta tu servicio real
+    private auth: AuthService,
     private router: Router
   ) { }
 

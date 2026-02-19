@@ -12,6 +12,11 @@
               {{ tarea?.nombre }}
             </h2>
           </div>
+          <div class="flex gap-2 justify-content-center">
+            <!-- ÚNICA ACCIÓN PARA USUARIO -->
+            <p-button icon="pi pi-clock" label="Apuntar jornada" severity="info"
+              (onClick)="openJornadaDialog(tarea)"></p-button>
+          </div>
           <div class="flex align-items-center gap-2">
             <p-tag [value]="tarea?.estado || 'N/A'" [severity]="getEstadoSeverity(tarea?.estado || '')" [rounded]="true"
               styleClass="text-sm font-semibold">
@@ -90,7 +95,8 @@
             <i class="pi pi-list mr-2"></i>
             Subtareas
           </h3>
-          <p-button *ngIf="isAdmin" label="Nueva Subtarea" icon="pi pi-plus" severity="success" (click)="openNew()"></p-button>
+          <p-button *ngIf="isAdmin" label="Nueva Subtarea" icon="pi pi-plus" severity="success"
+            (click)="openNew()"></p-button>
           <span class="text-sm text-600">{{ getTotalTareas() }} tarea(s)</span>
         </div>
       </ng-template>
@@ -110,6 +116,9 @@
                 <i class="pi pi-clock mr-1"></i>
                 {{ node.data.horas_estimadas ?? 0 }}h
               </span>
+              <p-button *ngIf="node?.data?.id && node.data.id !== tarea?.id" label="Ver detalle" icon="pi pi-eye"
+                styleClass="p-button-text p-button-sm" (click)="verDetalleTarea(node.data.id)">
+              </p-button>
             </div>
           </div>
 
@@ -177,73 +186,108 @@
 </div>
 
 <p-dialog [(visible)]="taskDialog" [style]="{ width: '600px' }" [header]="dialogTitle" [modal]="true"
-    styleClass="p-fluid" [draggable]="false" [resizable]="false">
+  styleClass="p-fluid" [draggable]="false" [resizable]="false">
 
-    <ng-template pTemplate="content">
-        <div class="flex flex-column gap-3 pt-1">
-            <div class="field mb-0">
-                <label for="nombre" class="font-bold">Nombre de la Tarea</label>
-                <input type="text" pInputText id="nombre" [(ngModel)]="task.nombre" required autofocus class="w-full" />
-                <small class="p-error block mt-1" *ngIf="submitted && !task.nombre">El nombre es requerido.</small>
-            </div>
+  <ng-template pTemplate="content">
+    <div class="flex flex-column gap-3 pt-1">
+      <div class="field mb-0">
+        <label for="nombre" class="font-bold">Nombre de la Tarea</label>
+        <input type="text" pInputText id="nombre" [(ngModel)]="task.nombre" required autofocus class="w-full" />
+        <small class="p-error block mt-1" *ngIf="submitted && !task.nombre">El nombre es requerido.</small>
+      </div>
 
-            <div class="field mb-0">
-                <label for="descripcion" class="font-bold">Descripción</label>
-                <textarea id="descripcion" pTextarea [(ngModel)]="task.descripcion" rows="4" class="w-full"
-                    [autoResize]="false" style="resize: none;"></textarea>
-            </div>
+      <div class="field mb-0">
+        <label for="descripcion" class="font-bold">Descripción</label>
+        <textarea id="descripcion" pTextarea [(ngModel)]="task.descripcion" rows="4" class="w-full" [autoResize]="false"
+          style="resize: none;"></textarea>
+      </div>
 
-            <div class="formgrid grid">
-                <div class="field col-6 mb-0">
-                    <label for="tipo" class="font-bold">Tipo</label>
-                    <p-select id="tipo" [options]="tipos" [(ngModel)]="task.tipo" optionLabel="label"
-                        optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-full">
-                    </p-select>
-                </div>
-                <div class="field col-6 mb-0">
-                    <label for="estado" class="font-bold">Estado</label>
-                    <p-select id="estado" [options]="estados" [(ngModel)]="task.estado" optionLabel="label"
-                        optionValue="value" placeholder="Seleccionar" appendTo="body" styleClass="w-full">
-                    </p-select>
-                </div>
-            </div>
-
-            <div class="field mb-0">
-                <label for="horas" class="font-bold">Horas Estimadas</label>
-                <p-inputNumber id="horas" [(ngModel)]="task.horas_estimadas" [min]="0" [showButtons]="true"
-                    buttonLayout="horizontal" inputStyleClass="text-center font-bold" styleClass="w-full"
-                    decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
-                    incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus">
-                </p-inputNumber>
-            </div>
-
-            <div class="formgrid grid">
-                <div class="field col-6 mb-0">
-                    <label for="fecha_ini" class="font-bold">Fecha Inicio</label>
-                    <p-datepicker id="fecha_ini" [(ngModel)]="task.fecha_ini" dateFormat="dd/mm/yy" [showIcon]="true"
-                        appendTo="body" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
-                </div>
-                <div class="field col-6 mb-0">
-                    <label for="fecha_fin" class="font-bold">Fecha Fin</label>
-                    <p-datepicker id="fecha_fin" [(ngModel)]="task.fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true"
-                        appendTo="body" placeholder="Opcional" styleClass="w-full"
-                        inputStyleClass="w-full"></p-datepicker>
-                </div>
-            </div>
-
-            <div class="field mb-0">
-                <label for="observaciones" class="font-bold">Observaciones</label>
-                <textarea id="observaciones" pTextarea [(ngModel)]="task.observaciones" rows="2"
-                    class="w-full"></textarea>
-            </div>
+      <div class="formgrid grid">
+        <div class="field col-6 mb-0">
+          <label for="tipo" class="font-bold">Tipo</label>
+          <p-select id="tipo" [options]="tipos" [(ngModel)]="task.tipo" optionLabel="label" optionValue="value"
+            placeholder="Seleccionar" appendTo="body" styleClass="w-full">
+          </p-select>
         </div>
-    </ng-template>
-
-    <ng-template pTemplate="footer">
-        <div class="flex justify-content-end gap-2">
-            <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
-                (click)="hideDialog()"></button>
-            <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" (click)="saveTask()"></button>
+        <div class="field col-6 mb-0">
+          <label for="estado" class="font-bold">Estado</label>
+          <p-select id="estado" [options]="estados" [(ngModel)]="task.estado" optionLabel="label" optionValue="value"
+            placeholder="Seleccionar" appendTo="body" styleClass="w-full">
+          </p-select>
         </div>
-    </ng-template>
+      </div>
+
+      <div class="field mb-0">
+        <label for="horas" class="font-bold">Horas Estimadas</label>
+        <p-inputNumber id="horas" [(ngModel)]="task.horas_estimadas" [min]="0" [showButtons]="true"
+          buttonLayout="horizontal" inputStyleClass="text-center font-bold" styleClass="w-full"
+          decrementButtonClass="p-button-secondary" incrementButtonClass="p-button-secondary"
+          incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus">
+        </p-inputNumber>
+      </div>
+
+      <div class="formgrid grid">
+        <div class="field col-6 mb-0">
+          <label for="fecha_ini" class="font-bold">Fecha Inicio</label>
+          <p-datepicker id="fecha_ini" [(ngModel)]="task.fecha_ini" dateFormat="dd/mm/yy" [showIcon]="true"
+            appendTo="body" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+        </div>
+        <div class="field col-6 mb-0">
+          <label for="fecha_fin" class="font-bold">Fecha Fin</label>
+          <p-datepicker id="fecha_fin" [(ngModel)]="task.fecha_fin" dateFormat="dd/mm/yy" [showIcon]="true"
+            appendTo="body" placeholder="Opcional" styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+        </div>
+      </div>
+
+      <div class="field mb-0">
+        <label for="observaciones" class="font-bold">Observaciones</label>
+        <textarea id="observaciones" pTextarea [(ngModel)]="task.observaciones" rows="2" class="w-full"></textarea>
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" (click)="saveTask()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Diálogo Jornada -->
+<p-dialog [(visible)]="jornadaDialog" [style]="{ width: '750px' }" header="Apuntar jornada" [modal]="true"
+  styleClass="p-fluid" [draggable]="false" [resizable]="false">
+  <ng-template pTemplate="content">
+    <div class="flex flex-column gap-3 pt-1">
+      <div class="text-900 font-bold" *ngIf="selectedTask">
+        Tarea: <span class="text-primary">{{ selectedTask.nombre }}</span>
+      </div>
+
+      <div class="formgrid grid">
+        <div class="field col-6 mb-0">
+          <label class="font-bold">Fecha</label>
+          <p-datepicker [(ngModel)]="jornadaFecha" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+            styleClass="w-full" inputStyleClass="w-full"></p-datepicker>
+        </div>
+        <div class="field col-6 mb-0">
+          <label class="font-bold">Horas</label>
+          <p-inputNumber [(ngModel)]="jornadaHoras" [min]="1" [max]="12" [showButtons]="true" buttonLayout="horizontal"
+            inputStyleClass="text-center font-bold" styleClass="w-full" decrementButtonClass="p-button-secondary"
+            incrementButtonClass="p-button-secondary" incrementButtonIcon="pi pi-plus"
+            decrementButtonIcon="pi pi-minus"></p-inputNumber>
+        </div>
+      </div>
+
+      <small class="text-600">* Se enviará para validación.</small>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text"
+        (click)="hideJornadaDialog()"></button>
+      <button pButton pRipple label="Guardar" icon="pi pi-check" severity="success" [loading]="savingJornada"
+        (click)="saveJornada()"></button>
+    </div>
+  </ng-template>
 </p-dialog>

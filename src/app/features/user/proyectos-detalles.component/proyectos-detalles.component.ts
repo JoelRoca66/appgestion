@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, inject, OnInit, signal, WritableSignal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ProjectService } from '../../../core/services/project.service';
 import { TaskService } from '../../../core/services/task.service';
 import { ProyectoTareasDTO, TareaLazyDTO } from '../../../core/models/project.model';
@@ -51,11 +51,11 @@ interface KanbanColumn {
   styleUrls: ['./proyectos-detalles.component.css']
 })
 export class ProyectosDetallesComponent implements OnInit {
-
   proyecto: ProyectoTareasDTO | null = null;
   taskTree: TreeNode[] = [];
   private loadingNodes = new Set<string>();
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   // ── Kanban ──────────────────────────────────────────
   kanbanColumns: KanbanColumn[] = [
@@ -371,4 +371,8 @@ export class ProyectosDetallesComponent implements OnInit {
       }
     });
   }
+
+  verDetalleTarea(tarea: TareaLazyDTO) {
+    this.router.navigate(['/user/tareas', tarea.id]);
+}
 }
