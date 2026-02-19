@@ -13,10 +13,14 @@
             </h2>
           </div>
           <div class="flex gap-2 justify-content-center">
-            <!-- ÚNICA ACCIÓN PARA USUARIO -->
             <p-button icon="pi pi-clock" label="Apuntar jornada" severity="info"
               (onClick)="openJornadaDialog(tarea)"></p-button>
           </div>
+          <div class="flex gap-2 justify-content-center">
+            <p-button icon="pi pi-wrench" label="Apuntar material" severity="info"
+              (onClick)="openMaterialDialog(tarea)"></p-button>
+          </div>
+
           <div class="flex align-items-center gap-2">
             <p-tag [value]="tarea?.estado || 'N/A'" [severity]="getEstadoSeverity(tarea?.estado || '')" [rounded]="true"
               styleClass="text-sm font-semibold">
@@ -185,6 +189,53 @@
   </div>
 </div>
 
+<!-- ===== MATERIALES ASIGNADOS ===== -->
+<div class="grid">
+  <div class="col-12">
+    <p-card styleClass="shadow-2">
+      
+      <ng-template pTemplate="header">
+        <div class="flex justify-content-between align-items-center p-3 bg-primary-50">
+          <h3 class="m-0 text-primary flex align-items-center">
+            <i class="pi pi-wrench mr-2"></i> 
+            Material asignado a la tarea
+          </h3>
+          <span class="text-sm text-600">{{ materialesTarea.length }} material(es)</span>
+        </div>
+      </ng-template>
+
+      <!-- Si hay materiales -->
+      <div *ngIf="materialesTarea.length > 0; else noMaterial">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="p-2 text-left">Nombre</th>
+              <th class="p-2 text-left">Cantidad</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let m of materialesTarea">
+              <td class="p-2">{{ m.nombre_material || '—' }}</td>
+              <td class="p-2">{{ m.cantidad }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Si no hay materiales -->
+      <ng-template #noMaterial>
+        <div class="p-4 text-center text-500">
+          <i class="pi pi-inbox mb-2" style="font-size: 1.5rem;"></i>
+          <p>No hay material asignado a esta tarea.</p>
+        </div>
+      </ng-template>
+
+    </p-card>
+  </div>
+</div>
+
+<!-- Diálogo Subtarea -->
 <p-dialog [(visible)]="taskDialog" [style]="{ width: '600px' }" [header]="dialogTitle" [modal]="true"
   styleClass="p-fluid" [draggable]="false" [resizable]="false">
 
@@ -290,4 +341,69 @@
         (click)="saveJornada()"></button>
     </div>
   </ng-template>
+</p-dialog>
+
+
+<!-- Diálogo Material -->
+<p-dialog 
+  [(visible)]="materialDialog" 
+  [style]="{ width: '650px' }" 
+  header="Asignar material a la tarea"
+  [modal]="true"
+  styleClass="p-fluid"
+  [draggable]="false"
+  [resizable]="false">
+
+  <ng-template pTemplate="content">
+    <div class="flex flex-column gap-3 pt-1">
+
+      <div class="text-900 font-bold">
+        Tarea: <span class="text-primary">{{ tarea?.nombre }}</span>
+      </div>
+
+      <div class="field">
+        <label class="font-bold">Material</label>
+        <p-select 
+          [options]="materiales" 
+          optionLabel="nombre" 
+          optionValue="id"
+          placeholder="Seleccionar material"
+          [(ngModel)]="selectedMaterialId"
+          appendTo="body"
+          styleClass="w-full"
+          [filter]="true"
+          filterBy="nombre">
+        </p-select>
+      </div>
+
+      <div class="field">
+        <label class="font-bold">Cantidad</label>
+        <p-inputNumber 
+          [(ngModel)]="materialCantidad" 
+          [min]="1" 
+          [showButtons]="true"
+          inputStyleClass="text-center font-bold"
+          styleClass="w-full"
+          decrementButtonClass="p-button-secondary"
+          incrementButtonClass="p-button-secondary"
+          incrementButtonIcon="pi pi-plus"
+          decrementButtonIcon="pi pi-minus">
+        </p-inputNumber>
+      </div>
+
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-content-end gap-2">
+      <button pButton pRipple label="Cancelar" class="p-button-text"
+        (click)="hideMaterialDialog()">
+      </button>
+
+      <button pButton pRipple label="Guardar" severity="success"
+        (click)="saveMaterial()" [loading]="savingMaterial">
+      </button>
+    </div>
+  </ng-template>
+
 </p-dialog>

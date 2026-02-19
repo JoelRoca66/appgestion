@@ -3,12 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TaskService } from '../../../core/services/task.service';
 import { TareaLazyDTO } from '../../../core/models/project.model';
-import { Task, TaskDTO, TaskState } from '../../../core/models/task.model'; // ⬅️ importa Task y TaskState
+import { Task, TaskDTO, TaskState } from '../../../core/models/task.model';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TreeModule } from 'primeng/tree';
-import { BadgeModule } from 'primeng/badge';                  // ⬅️ badge para contador
+import { BadgeModule } from 'primeng/badge';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
@@ -24,6 +24,9 @@ import { AuthService } from '../../../core/services/auth.service';
 import { RecordService } from '../../../core/services/record.service';
 import { JornadaDTO } from '../../../core/models/record.model';
 import { finalize } from 'rxjs/operators';
+import { Material } from '../../../core/models/material.model';
+import { MaterialService } from '../../../core/services/material.service';
+import { TareaMaterialService } from '../../../core/services/tareamaterial.service';
 
 type KanbanColumnKey = 'pendientes' | 'progreso' | 'bloqueadas' | 'revision' | 'completadas';
 interface KanbanColumn {
@@ -59,7 +62,6 @@ interface KanbanColumn {
   styleUrls: ['./tareas-detalles.component.css']
 })
 export class TareasDetallesComponent implements OnInit {
-
   tarea: TareaLazyDTO | null = null;
   taskTree: TreeNode[] = [];
   private loadingNodes = new Set<string>();
@@ -89,6 +91,17 @@ export class TareasDetallesComponent implements OnInit {
   savingJornada = false;
 
 
+  // Material / tarea
+  materialDialog = false;
+  materiales: any[] = [];
+  selectedMaterialId: number | null = null;
+  materialCantidad: number | null = null;
+  savingMaterial = false;
+
+
+  materialesTarea: any[] = [];
+
+
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
@@ -96,6 +109,8 @@ export class TareasDetallesComponent implements OnInit {
     private auth: AuthService,
     private jornadaService: RecordService,
     private messageService: MessageService,
+    private materialService: MaterialService,
+    private tareaMaterialService: TareaMaterialService
   ) { }
 
   ngOnInit(): void {
@@ -149,6 +164,12 @@ export class TareasDetallesComponent implements OnInit {
             this.cdr.markForCheck();
           });
         }
+      }
+    });
+    this.tareaMaterialService.getByTarea(id).subscribe({
+      next: (res) => {
+        this.materialesTarea = res;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -552,6 +573,73 @@ export class TareasDetallesComponent implements OnInit {
   verDetalleTarea(key: number) {
     console.log('Navegando a detalle de tarea con id:', key);
     this.router.navigate(['/user/tareas', key]);
+  }
+
+  openMaterialDialog(tarea: TareaLazyDTO | TaskDTO | null) {
+    if (!tarea) return;
+
+    this.selectedTask = tarea;
+    this.selectedMaterialId = null;
+    this.materialCantidad = 1;
+
+    this.loadAllMateriales();
+    this.materialDialog = true;
+    this.cdr.markForCheck();
+  }
+  loadAllMateriales() {
+    this.materialService.getMaterials(0, 100).subscribe({
+      next: (res: any) => {
+        this.materiales = res.content || res; // seguridad
+        this.cdr.markForCheck();
+      },
+      error: err => console.error(err)
+    });
+  }
+  saveMaterial() {
+    if (!this.selectedTask?.id) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Tarea no válida.' });
+      return;
+    }
+    if (!this.selectedMaterialId) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Seleccione un material.' });
+      return;
+    }
+    if (!this.materialCantidad || this.materialCantidad <= 0) {
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Cantidad inválida.' });
+      return;
+    }
+
+    const body = {
+      id_tarea: this.selectedTask.id,
+      id_material: this.selectedMaterialId,
+      cantidad: this.materialCantidad
+    };
+    console.log('Asignando material con payload:', body);
+    this.savingMaterial = true;
+
+    this.tareaMaterialService.addMaterial(body).pipe(
+      finalize(() => {
+        this.savingMaterial = false;
+        this.cdr.markForCheck();
+      })
+    ).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Material asignado',
+          detail: 'El material fue asignado correctamente.'
+        });
+        this.materialDialog = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo asignar el material.' });
+      }
+    });
+  }
+
+  hideMaterialDialog() {
+    this.materialDialog = false;
   }
 
 }
