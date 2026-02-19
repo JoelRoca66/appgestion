@@ -65,6 +65,6 @@ export const guestGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  const targetRoute = isAdminRole(user.rol) ? '/admin/dashboard' : '/user/home';
+  const targetRoute = isAdminRole(user.rol) ? '/admin/home' : '/user/home';
   return router.createUrlTree([targetRoute]);
 };

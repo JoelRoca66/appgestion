@@ -27,7 +27,7 @@ import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { RecordService} from '../../../core/services/record.service';
+import { RecordService } from '../../../core/services/record.service';
 import { Record } from '../../../core/models/record.model';
 import { RecordFilter } from '../../../core/models/recordFilter.model';
 import { WorkerNameDTO } from '../../../core/models/worker.model';

@@ -49,6 +49,12 @@ export interface TaskListDTO {
     id: number;
     nombre: string;
 }
+export interface TaskListValidarDTO {
+    id: number;
+    nombre: string;
+    id_proyecto: number;
+}
+
 export interface ProyectoDTOTarea {
   id: number;
   nombre: string;

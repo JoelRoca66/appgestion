@@ -1,4 +1,4 @@
-import { TaskListDTO } from "./task.model";
+import { TaskListDTO, TaskListValidarDTO } from "./task.model";
 import { WorkerNameDTO } from "./worker.model";
 
 export interface Record {
@@ -10,6 +10,14 @@ export interface Record {
     id_trabajador: WorkerNameDTO;
 }
 
+export interface RecordValidarDTO {
+    id: number;
+    fecha: Date;
+    horas: number;
+    validado: boolean;
+    id_tarea: TaskListValidarDTO;
+    id_trabajador: WorkerNameDTO;
+}
 export interface JornadaDTO {
   fecha: string;
   horas: number;

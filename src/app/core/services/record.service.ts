@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { RecordFilter } from '../models/recordFilter.model';
-import { JornadaDTO, Record } from '../models/record.model';
+import { JornadaDTO, Record, RecordValidarDTO } from '../models/record.model';
 
 
 export interface PageResponse<T> {
@@ -61,8 +61,8 @@ export class RecordService {
     countNoValidadas(): Observable<number> {
         return this.http.get<number>(`${this.apiUrl}/count/no_validadas`);
     }
-    getNoValdidas(page: number, size: number): Observable<PageResponse<Record>> {
-        return this.http.get<PageResponse<Record>>(`${this.apiUrl}/all/no_validadas`, { params: { page, size } });
+    getNoValdidas(page: number, size: number): Observable<PageResponse<RecordValidarDTO>> {
+        return this.http.get<PageResponse<RecordValidarDTO>>(`${this.apiUrl}/all/no_validadas`, { params: { page, size } });
     }
 
     addJornada(dto: JornadaDTO): Observable<void> {

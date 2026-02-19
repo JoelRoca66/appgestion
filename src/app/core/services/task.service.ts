@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Task, TaskDTO, TaskListDTO } from '../models/task.model';
+import { Task, TaskDTO, TaskListDTO, TaskListValidarDTO } from '../models/task.model';
 import { TaskFilter } from '../models/taskFilter.model';
 import { create } from 'domain';
 import { TareaLazyDTO } from '../models/project.model';
@@ -85,6 +85,11 @@ export class TaskService {
     getAllTaskNamesFromProject(id: number): Observable<TaskListDTO[]> {
         return this.http.get<TaskListDTO[]>(`${this.apiUrl}/all/nombres`, { params: { id } });
     }
+
+    getAllTaskNamesFromProjectValidar(id: number): Observable<TaskListValidarDTO[]> {
+        return this.http.get<TaskListValidarDTO[]>(`${this.apiUrl}/all/nombres-validar`, { params: { id } });
+    }
+    
     getNameById(id: number): Observable<string> {
         return this.http.get(`${this.apiUrl}/nombre/${id}`, {
             responseType: 'text'

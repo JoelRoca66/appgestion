@@ -197,7 +197,7 @@
             </div>
 
             <div class="field mb-0">
-                <label for="padre" class="font-bold">Tarea Padre (Opcional)</label>
+                <label for="padre" class="font-bold">Tarea Padre</label>
                 <p-select id="padre" [options]="parentCandidates" [(ngModel)]="task.tarea_padre" optionLabel="nombre"
                     [disabled]="!task.id_proyecto.id" [loading]="loadingParents"
                     [placeholder]="task.id_proyecto.id ? 'Sin padre (Tarea raíz)' : 'Seleccione primero un proyecto'"
