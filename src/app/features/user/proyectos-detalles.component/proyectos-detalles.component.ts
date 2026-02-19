@@ -18,6 +18,7 @@ import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DatePickerModule } from 'primeng/datepicker';
+import { TableModule } from "primeng/table";
 
 type KanbanColumnKey = 'pendientes' | 'progreso' | 'bloqueadas' | 'revision' | 'completadas';
 
@@ -45,7 +46,8 @@ interface KanbanColumn {
     SelectModule,
     TextareaModule,
     InputNumberModule,
-    DatePickerModule
+    DatePickerModule,
+    TableModule
 ],
   templateUrl: './proyectos-detalles.component.html',
   styleUrls: ['./proyectos-detalles.component.css']
@@ -100,7 +102,7 @@ export class ProyectosDetallesComponent implements OnInit {
     this.projectService.findById(id).subscribe({
       next: (res) => {
         this.proyecto = res;
-        const tareas = res.tareas_principales || [];
+        const tareas = (res.tareas_principales || []).sort((a, b) => a.id - b.id);
 
         // Tree
         this.taskTree = tareas.map(t => this.mapTaskToTreeNode(t));
