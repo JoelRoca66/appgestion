@@ -28,6 +28,7 @@ export interface TareaLazyDTO {
   id_proyecto: number;
   tarea_padre: number | null;
   subtareas?: TareaLazyDTO[] | null;
+  num_subtareas?: number;
 }
 
 export interface ProyectoTareasDTO {

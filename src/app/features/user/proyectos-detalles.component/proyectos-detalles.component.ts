@@ -198,6 +198,8 @@ export class ProyectosDetallesComponent implements OnInit {
 
 
   private mapTaskToTreeNode(task: TareaLazyDTO): TreeNode {
+    const subtaskCount = (task as any)?.num_subtareas;
+    const hasSubtaskCount = typeof subtaskCount === 'number';
     const hasKnownChildren = Array.isArray(task.subtareas);
     const mayHaveChildren = task.subtareas === null;
     let children: TreeNode[] = [];
@@ -206,6 +208,9 @@ export class ProyectosDetallesComponent implements OnInit {
     if (hasKnownChildren) {
       children = (task.subtareas as TareaLazyDTO[]).map(t => this.mapTaskToTreeNode(t));
       isLeaf = children.length === 0;
+    } else if (hasSubtaskCount) {
+      children = [];
+      isLeaf = subtaskCount === 0;
     } else if (mayHaveChildren) {
       children = [];
       isLeaf = false;
