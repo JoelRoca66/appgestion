@@ -424,4 +424,41 @@ export class ProyectosDetallesComponent implements OnInit {
   calcularPrecioTotalProyecto(): number {
     return this.precioTotalProyecto;
   }
+
+  descargarInforme() {
+    const projectId = this.proyecto?.id;
+    if (!projectId) return;
+
+    this.projectService.descargarInformeProyecto(projectId).subscribe({
+      next: (response) => {
+        const blob = response.body;
+        if (!blob) return;
+
+        const contentDisposition = response.headers.get('content-disposition') ?? '';
+        const fileName = this.extraerNombreArchivo(contentDisposition) ?? `informe-proyecto-${projectId}.pdf`;
+
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error descargando informe:', err);
+      }
+    });
+  }
+
+  private extraerNombreArchivo(contentDisposition: string): string | null {
+    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]);
+
+    const normalMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    if (normalMatch?.[1]) return normalMatch[1];
+
+    return null;
+  }
 }

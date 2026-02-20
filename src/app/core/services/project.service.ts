@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Project, ProjectDTO } from '../models/project.model';
 import { ProjectFilter } from '../models/projectFilter.model';
 import { formatDateLocal } from '../../features/utilidades/date-utils';
@@ -69,5 +69,9 @@ export class ProjectService {
 
     getMaterialesProyecto(id: number): Observable<MaterialAgrupadoDTO[]> {
         return this.http.get<MaterialAgrupadoDTO[]>(`${this.apiUrl}/${id}/materiales`);
+    }
+
+    descargarInformeProyecto(id: number): Observable<HttpResponse<Blob>> {
+        return this.http.get(`${this.apiUrl}/report/${id}`, { observe: 'response', responseType: 'blob' });
     }
 }
