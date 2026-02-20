@@ -5,6 +5,7 @@ import { Project, ProjectDTO } from '../models/project.model';
 import { ProjectFilter } from '../models/projectFilter.model';
 import { formatDateLocal } from '../../features/utilidades/date-utils';
 import { ProyectoTareasDTO } from '../models/project.model';
+import { MaterialAgrupadoDTO } from '../models/tareamaterial.model';
 
 
 export interface PageResponse<T> {
@@ -64,5 +65,9 @@ export class ProjectService {
     }
     getNameById(id: number): Observable<string> {
         return this.http.get<string>(`${this.apiUrl}/${id}/nombre`);
+    }
+
+    getMaterialesProyecto(id: number): Observable<MaterialAgrupadoDTO[]> {
+        return this.http.get<MaterialAgrupadoDTO[]>(`${this.apiUrl}/${id}/materiales`);
     }
 }

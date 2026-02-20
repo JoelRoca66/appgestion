@@ -48,7 +48,7 @@ interface KanbanColumn {
     InputNumberModule,
     DatePickerModule,
     TableModule
-],
+  ],
   templateUrl: './proyectos-detalles.component.html',
   styleUrls: ['./proyectos-detalles.component.css']
 })
@@ -58,6 +58,9 @@ export class ProyectosDetallesComponent implements OnInit {
   private loadingNodes = new Set<string>();
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  precioTotalMateriales: number = 0;
+  precioBeneficio: number = 0;
+  precioTotalProyecto: number = 0;
 
   // ── Kanban ──────────────────────────────────────────
   kanbanColumns: KanbanColumn[] = [
@@ -71,6 +74,8 @@ export class ProyectosDetallesComponent implements OnInit {
   kanbanColumnIds = this.kanbanColumns.map(c => c.key);
   isAdmin = false;
 
+  materialesProyecto: any[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private projectService: ProjectService,
@@ -81,6 +86,7 @@ export class ProyectosDetallesComponent implements OnInit {
     const projectId = Number(this.route.snapshot.paramMap.get('id'));
     this.detectAdminFromStorage();
     this.loadProject(projectId);
+    this.loadMaterialesProyecto(projectId);
   }
 
   private detectAdminFromStorage() {
@@ -109,6 +115,8 @@ export class ProyectosDetallesComponent implements OnInit {
 
         // Kanban — distribuir tareas por estado
         this.distribuirTareasKanban(tareas);
+
+        this.actualizarTotalesProyecto();
 
         this.cdr.markForCheck();
       }
@@ -381,5 +389,39 @@ export class ProyectosDetallesComponent implements OnInit {
 
   verDetalleTarea(tarea: TareaLazyDTO) {
     this.router.navigate(['/user/tareas', tarea.id]);
-}
+  }
+
+  loadMaterialesProyecto(projectId: number) {
+    this.projectService.getMaterialesProyecto(projectId).subscribe({
+      next: (res) => {
+        this.materialesProyecto = res;
+        this.actualizarTotalesProyecto();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('Error cargando materiales del proyecto:', err);
+        this.materialesProyecto = [];
+        this.actualizarTotalesProyecto();
+      }
+    });
+  }
+
+  private actualizarTotalesProyecto(): void {
+    this.precioTotalMateriales = this.materialesProyecto.reduce(
+      (acc, m) => acc + (Number(m?.precioTotal) || 0),
+      0
+    );
+
+    const margen = this.proyecto?.margen_beneficio ?? 0;
+    this.precioBeneficio = (margen / 100) * this.precioTotalMateriales;
+    this.precioTotalProyecto = this.precioTotalMateriales + this.precioBeneficio;
+  }
+
+  calcularPrecioBeneficio(): number {
+    return this.precioBeneficio;
+  }
+
+  calcularPrecioTotalProyecto(): number {
+    return this.precioTotalProyecto;
+  }
 }
