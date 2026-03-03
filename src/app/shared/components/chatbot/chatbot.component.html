@@ -1,0 +1,97 @@
+<!-- Botón flotante -->
+<div class="chatbot-container">
+    <button 
+        *ngIf="!isOpen()" 
+        class="chatbot-toggle" 
+        (click)="toggleChat()"
+        pButton
+        icon="pi pi-comments"
+        [rounded]="true"
+        severity="info"
+        [style]="{'width': '60px', 'height': '60px', 'font-size': '1.5rem'}">
+    </button>
+
+    <!-- Ventana de chat -->
+    <div *ngIf="isOpen()" class="chatbot-window">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="flex align-items-center gap-2">
+                <i class="pi pi-comments text-2xl"></i>
+                <div>
+                    <h3 class="m-0 text-white">Asistente IA</h3>
+                    <small class="text-white-alpha-80">Powered by Groq</small>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <p-button 
+                    icon="pi pi-trash" 
+                    [text]="true" 
+                    [rounded]="true"
+                    severity="secondary"
+                    (onClick)="clearChat()"
+                    pTooltip="Limpiar chat"
+                    tooltipPosition="left">
+                </p-button>
+                <p-button 
+                    icon="pi pi-times" 
+                    [text]="true" 
+                    [rounded]="true"
+                    severity="secondary"
+                    (onClick)="toggleChat()">
+                </p-button>
+            </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div class="chat-messages">
+            <div *ngFor="let msg of messages()" 
+                 [class]="'message message-' + msg.role">
+                <div class="message-content">
+                    <div class="message-avatar">
+                        <i [class]="msg.role === 'user' ? 'pi pi-user' : 'pi pi-robot'"></i>
+                    </div>
+                    <div class="message-bubble">
+                        <div class="message-text" [innerHTML]="msg.content | replaceNewlines"></div>
+                        <small class="message-time">
+                            {{ msg.timestamp | date:'HH:mm' }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Indicador de escritura -->
+            <div *ngIf="isTyping()" class="message message-assistant">
+                <div class="message-content">
+                    <div class="message-avatar">
+                        <i class="pi pi-robot"></i>
+                    </div>
+                    <div class="message-bubble">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input">
+            <input 
+                type="text" 
+                pInputText 
+                [(ngModel)]="userInput"
+                (keypress)="onKeyPress($event)"
+                placeholder="Escribe tu mensaje..."
+                [disabled]="isTyping()"
+                class="w-full">
+            <p-button 
+                icon="pi pi-send" 
+                (onClick)="sendMessage()"
+                [disabled]="!userInput.trim() || isTyping()"
+                [loading]="isTyping()">
+            </p-button>
+        </div>
+    </div>
+</div>

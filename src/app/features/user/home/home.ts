@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -51,7 +52,8 @@ export class UserHomeComponent implements OnInit {
   constructor(
     private storage: StorageService,
     private workerService: WorkerService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private router: Router
   ) { }
   private cdr = inject(ChangeDetectorRef);
 
@@ -130,6 +132,15 @@ export class UserHomeComponent implements OnInit {
   }
 
   verDetalleTarea(tarea: TaskUI) {
-    console.log("Detalle tarea:", tarea);
+    if (!tarea?.id) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Atención',
+        detail: 'No se encontró el identificador de la tarea'
+      });
+      return;
+    }
+
+    this.router.navigate(['/user/tareas', tarea.id]);
   }
 }
