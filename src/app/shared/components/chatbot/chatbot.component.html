@@ -16,10 +16,10 @@
         <!-- Header -->
         <div class="chat-header">
             <div class="flex align-items-center gap-2">
-                <i class="pi pi-comments text-2xl"></i>
+                <i class="pi pi-comments text-2xl text-black-alpha-80"></i>
                 <div>
-                    <h3 class="m-0 text-white">Asistente IA</h3>
-                    <small class="text-white-alpha-80">Powered by Groq</small>
+                    <h3 class="m-0 text-black-alpha-80">Asistente IA</h3>
+                    <small class="text-black-alpha-80">Powered by Groq</small>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -27,7 +27,7 @@
                     icon="pi pi-trash" 
                     [text]="true" 
                     [rounded]="true"
-                    severity="secondary"
+                    severity="contrast"
                     (onClick)="clearChat()"
                     pTooltip="Limpiar chat"
                     tooltipPosition="left">
@@ -36,7 +36,7 @@
                     icon="pi pi-times" 
                     [text]="true" 
                     [rounded]="true"
-                    severity="secondary"
+                    severity="contrast"
                     (onClick)="toggleChat()">
                 </p-button>
             </div>

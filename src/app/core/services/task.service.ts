@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Task, TaskDTO, TaskListDTO, TaskListValidarDTO } from '../models/task.model';
 import { TaskFilter } from '../models/taskFilter.model';
 import { create } from 'domain';
@@ -94,5 +94,8 @@ export class TaskService {
         return this.http.get(`${this.apiUrl}/nombre/${id}`, {
             responseType: 'text'
         });
+    }
+    descargarInformeTarea(id: number): Observable<HttpResponse<Blob>> {
+        return this.http.get(`${this.apiUrl}/report/${id}`, { observe: 'response', responseType: 'blob' });
     }
 }

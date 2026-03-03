@@ -105,7 +105,6 @@ export class TareasDetallesComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private taskService: TaskService,
-    private proyectService: TaskService,
     private auth: AuthService,
     private jornadaService: RecordService,
     private messageService: MessageService,
@@ -152,8 +151,8 @@ export class TareasDetallesComponent implements OnInit {
 
         this.cdr.markForCheck();
 
-        if (res.id_proyecto) {
-          this.proyectService.findById(res.id_proyecto).subscribe(p => {
+        if (res.id) {
+          this.taskService.findById(res.id).subscribe(p => {
             this.projectName = p.nombre;
             this.cdr.markForCheck();
           });
@@ -640,6 +639,45 @@ export class TareasDetallesComponent implements OnInit {
 
   hideMaterialDialog() {
     this.materialDialog = false;
+  }
+
+
+
+  descargarInforme() {
+    const tareaId = this.tarea?.id;
+    if (!tareaId) return;
+
+    this.taskService.descargarInformeTarea(tareaId).subscribe({
+      next: (response) => {
+        const blob = response.body;
+        if (!blob) return;
+
+        const contentDisposition = response.headers.get('content-disposition') ?? '';
+        const fileName = this.extraerNombreArchivo(contentDisposition) ?? `jornadas-tarea-${tareaId}.pdf`;
+
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error descargando informe:', err);
+      }
+    });
+  }
+
+  private extraerNombreArchivo(contentDisposition: string): string | null {
+    const utf8Match = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1]);
+
+    const normalMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    if (normalMatch?.[1]) return normalMatch[1];
+
+    return null;
   }
 
 }
